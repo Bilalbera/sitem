@@ -1,1 +1,399 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mega Süper Düper Menü</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --menu-bg: rgba(30, 41, 59, 0.7);
+            --accent-color: #38bdf8;
+            --text-color: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
 
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            background-image: radial-gradient(circle at top right, rgba(56, 189, 248, 0.1), transparent 40%);
+        }
+
+        /* Navigasyon Barı */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid var(--border-color);
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(12px);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+            background: linear-gradient(to right, #38bdf8, #818cf8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-item {
+            position: relative;
+        }
+
+        .nav-btn {
+            background: none;
+            border: none;
+            color: var(--text-color);
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: color 0.3s;
+        }
+
+        .nav-btn:hover, .nav-btn.active {
+            color: var(--accent-color);
+        }
+
+        .nav-btn i {
+            font-size: 0.8rem;
+            transition: transform 0.3s;
+        }
+
+        .nav-btn.active i {
+            transform: rotate(180deg);
+        }
+
+        /* MEGA MENÜ PANELİ */
+        .mega-menu {
+            position: fixed;
+            top: 73px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-20px);
+            width: 95%;
+            max-width: 1200px;
+            background: var(--menu-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 2rem;
+            display: grid;
+            grid-template-columns: 1fr 2fr 1fr;
+            gap: 2rem;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            z-index: 99;
+        }
+
+        .mega-menu.open {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* Sütun Düzenleri */
+        .menu-column h4 {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--accent-color);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .menu-list {
+            list-style: none;
+        }
+
+        .menu-list li a {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            color: var(--text-color);
+            text-decoration: none;
+            padding: 0.75rem;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        .menu-list li a:hover {
+            background: rgba(255, 255, 255, 0.05);
+            transform: translateX(5px);
+        }
+
+        .menu-list li a i {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            width: 24px;
+            text-align: center;
+        }
+
+        .menu-list li a:hover i {
+            color: var(--accent-color);
+        }
+
+        .menu-list .title {
+            font-weight: 600;
+            display: block;
+            font-size: 0.95rem;
+        }
+
+        .menu-list .desc {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            display: block;
+            margin-top: 2px;
+        }
+
+        /* Grid Alanı (Orta Sütun) */
+        .grid-sub-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        /* Öne Çıkan Kart (Sağ Sütun) */
+        .featured-card {
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.1), rgba(129, 140, 248, 0.1));
+            border: 1px solid rgba(56, 189, 248, 0.2);
+            border-radius: 12px;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .featured-card h5 {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .featured-card p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+            margin-bottom: 1.5rem;
+        }
+
+        .featured-btn {
+            background: var(--accent-color);
+            color: #000;
+            padding: 0.6rem 1rem;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-align: center;
+            transition: opacity 0.2s;
+        }
+
+        .featured-btn:hover {
+            opacity: 0.9;
+        }
+
+        /* İçerik Alanı (Demo için) */
+        .content {
+            margin-top: 150px;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .content h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Mobil Uyumluluk */
+        @media (max-width: 900px) {
+            .mega-menu {
+                grid-template-columns: 1fr;
+                max-height: 80vh;
+                overflow-y: auto;
+            }
+            .grid-sub-column {
+                grid-template-columns: 1fr;
+            }
+            .featured-card {
+                display: none; /* Mobilde yerden tasarruf */
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="logo">MEGA.DEV</div>
+        <ul class="nav-links">
+            <li class="nav-item">
+                <button class="nav-btn" id="megaMenuBtn">
+                    Çözümlerimiz <i class="fa-solid fa-chevron-down"></i>
+                </button>
+            </li>
+            <li class="nav-item"><button class="nav-btn">Hakkımızda</button></li>
+            <li class="nav-item"><button class="nav-btn">İletişim</button></li>
+        </ul>
+    </nav>
+
+    <div class="mega-menu" id="megaMenu">
+        
+        <div class="menu-column">
+            <h4><i class="fa-solid fa-bolt"></i> Hızlı Başlangıç</h4>
+            <ul class="menu-list">
+                <li>
+                    <a href="#">
+                        <i class="fa-solid fa-rocket"></i>
+                        <div>
+                            <span class="title">Bulut Sunucu</span>
+                            <span class="desc">0.02 saniyede dağıtın.</span>
+                        </div>
+                    </a>
+                </li>
+                <li>
+                    <a href="#">
+                        <i class="fa-solid fa-database"></i>
+                        <div>
+                            <span class="title">Managed DB</span>
+                            <span class="desc">Otomatik ölçeklenen SQL.</span>
+                        </div>
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <div class="menu-column">
+            <h4><i class="fa-solid fa-layer-group"></i> Gelişmiş Servisler</h4>
+            <div class="grid-sub-column">
+                <ul class="menu-list">
+                    <li>
+                        <a href="#">
+                            <i class="fa-solid fa-shield-halved"></i>
+                            <div>
+                                <span class="title">Siber Güvenlik</span>
+                                <span class="desc">DDoS ve WAF koruması.</span>
+                            </div>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#">
+                            <i class="fa-solid fa-brain"></i>
+                            <div>
+                                <span class="title">Yapay Zeka API</span>
+                                <span class="desc">LLM entegrasyonları.</span>
+                            </div>
+                        </a>
+                    </li>
+                </ul>
+                <ul class="menu-list">
+                    <li>
+                        <a href="#">
+                            <i class="fa-solid fa-chart-line"></i>
+                            <div>
+                                <span class="title">Analitik Panel</span>
+                                <span class="desc">Anlık veri takibi.</span>
+                            </div>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#">
+                            <i class="fa-solid fa-code-branch"></i>
+                            <div>
+                                <span class="title">CI/CD Entegre</span>
+                                <span class="desc">GitHub otomatik deploy.</span>
+                            </div>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="menu-column featured-card">
+            <div>
+                <h5><i class="fa-solid fa-star" style="color: gold;"></i> Yeni Sürüm v3.5</h5>
+                <p>Yeni nesil edge computing altyapımız yayında. Küresel gecikme süreleri %40 düşürüldü.</p>
+            </div>
+            <a href="#" class="featured-btn">Hemen İncele</a>
+        </div>
+
+    </div>
+
+    <div class="content">
+        <h1>Geleceğin Web Altyapısı</h1>
+        <p>Yukarıdaki "Çözümlerimiz" butonuna basarak mega menüyü test edebilirsin.</p>
+    </div>
+
+    <script>
+        const menuBtn = document.getElementById('megaMenuBtn');
+        const megaMenu = document.getElementById('megaMenu');
+
+        // Menüyü Aç/Kapat Fonksiyonu
+        function toggleMenu() {
+            const isOpen = megaMenu.classList.contains('open');
+            if (isOpen) {
+                closeMenu();
+            } else {
+                openMenu();
+            }
+        }
+
+        function openMenu() {
+            megaMenu.classList.add('open');
+            menuBtn.classList.add('active');
+        }
+
+        function closeMenu() {
+            megaMenu.classList.remove('open');
+            menuBtn.classList.remove('active');
+        }
+
+        // Butona tıklama olayı
+        menuBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            toggleMenu();
+        });
+
+        // Menünün dışına tıklayınca otomatik kapansın (UX için önemli!)
+        document.addEventListener('click', (e) => {
+            if (!megaMenu.contains(e.target) && !menuBtn.contains(e.target)) {
+                closeMenu();
+            }
+        });
+
+        // ESC tuşuna basınca kapansın (Aşırı gelişmiş klavye dostu detay)
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeMenu();
+            }
+        });
+    </script>
+</body>
+</html>
