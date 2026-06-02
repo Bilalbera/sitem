@@ -11,6 +11,7 @@
             --neon-magenta: #ff0055;
             --bg-dark: #05050a;
             --text-main: #ffffff;
+            --panel-bg: rgba(7, 7, 15, 0.9);
         }
 
         * {
@@ -39,7 +40,7 @@
             width: 100%;
             height: 100%;
             background-color: #020205;
-            z-index: 9999; /* Menünün tamamen üstünde kalması için yükseltildi */
+            z-index: 9999;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -49,7 +50,6 @@
             transition: opacity 1.5s ease-in-out, visibility 1.5s ease-in-out;
         }
 
-        /* Ekran kapanırken tetiklenecek class */
         .loading-screen.fade-out {
             opacity: 0;
             visibility: hidden;
@@ -66,7 +66,6 @@
             text-align: center;
         }
 
-        /* Yükleme Çubuğu Alanı */
         .loader-container {
             width: 300px;
             background: rgba(255, 255, 255, 0.05);
@@ -78,13 +77,12 @@
             transition: opacity 0.5s ease;
         }
 
-        /* Çubuk dolunca sadece barı gizlemek için kullanılacak */
         .loader-container.hide-bar {
             opacity: 0;
         }
 
         .progress-bar {
-            width: 0%; /* JS sıfırdan başlatacak */
+            width: 0%;
             height: 8px;
             background: linear-gradient(90deg, var(--neon-magenta), var(--neon-cyan));
             border-radius: 50px;
@@ -102,27 +100,44 @@
         }
 
         /* ==========================================================================
-           2. ANA MENÜ (MAIN MENU)
+           2. ANA OYUN MENÜSÜ & ARKA PLAN
            ========================================================================== */
+        .grid-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(to right, rgba(0, 240, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(0, 240, 255, 0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+            z-index: 1;
+        }
+
         .main-menu-content {
             height: 100vh;
             display: flex;
             align-items: center;
             justify-content: flex-start;
             padding-left: 10%;
-            background-image: 
-                linear-gradient(to right, rgba(0, 240, 255, 0.03) 1px, transparent 1px),
-                linear-gradient(to bottom, rgba(0, 240, 255, 0.03) 1px, transparent 1px);
-            background-size: 40px 40px;
             opacity: 0;
             transform: scale(1.05);
-            transition: all 2s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: all 1.5s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: 5;
+            position: relative;
         }
 
-        /* Giriş ekranı bitince menünün canlanması için */
         .main-menu-content.show-menu {
             opacity: 1;
             transform: scale(1);
+        }
+
+        /* Menü Gizleme Sınıfı (Ayarlar açılınca menü sola kaysın) */
+        .main-menu-content.slide-out {
+            opacity: 0;
+            transform: translateX(-100px);
+            pointer-events: none;
         }
 
         .game-header {
@@ -192,6 +207,186 @@
             transform: translateX(0);
         }
 
+        /* ==========================================================================
+           3. MEGA GELİŞMİŞ AYARLAR MENÜSÜ (SETTINGS PANEL)
+           ========================================================================== */
+        .settings-panel {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -45%) scale(0.95);
+            width: 80%;
+            max-width: 1000px;
+            height: 75vh;
+            background: var(--panel-bg);
+            border: 1px solid rgba(0, 240, 255, 0.2);
+            box-shadow: 0 0 40px rgba(0, 240, 255, 0.1);
+            border-radius: 12px;
+            z-index: 10;
+            display: grid;
+            grid-template-columns: 250px 1fr; /* Sol taraf kategori, sağ taraf içerik */
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .settings-panel.open {
+            opacity: 1;
+            visibility: visible;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        /* Ayarlar Sol Menü (Kategoriler) */
+        .settings-tabs {
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 2rem 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+
+        .settings-tabs h3 {
+            font-size: 1rem;
+            color: var(--neon-cyan);
+            letter-spacing: 3px;
+            margin-bottom: 1.5rem;
+            padding-left: 0.5rem;
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.5);
+            font-family: inherit;
+            font-size: 1.1rem;
+            font-weight: bold;
+            text-align: left;
+            padding: 0.8rem 1rem;
+            cursor: pointer;
+            letter-spacing: 2px;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .tab-btn:hover, .tab-btn.active {
+            color: #fff;
+            background: rgba(0, 240, 255, 0.1);
+            text-shadow: 0 0 5px var(--neon-cyan);
+        }
+
+        .tab-btn.active {
+            border-left: 3px solid var(--neon-cyan);
+        }
+
+        /* Ayarlar Sağ Bölüm (İçerikler) */
+        .settings-content {
+            padding: 3rem;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .tab-content {
+            display: none;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .tab-content.active {
+            display: flex;
+        }
+
+        /* Ayar Satırları Tasarımı */
+        .setting-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+        }
+
+        .setting-label {
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+        }
+
+        .setting-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        .setting-desc {
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        /* İnteraktif Elemanlar (Slider, Select, Switch) */
+        .setting-control select {
+            background: #111;
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 0.5rem 1rem;
+            font-family: inherit;
+            border-radius: 4px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .setting-control select:focus {
+            border-color: var(--neon-cyan);
+        }
+
+        .setting-control input[type="range"] {
+            -webkit-appearance: none;
+            width: 150px;
+            background: rgba(255, 255, 255, 0.1);
+            height: 6px;
+            border-radius: 5px;
+            outline: none;
+        }
+
+        .setting-control input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            background: var(--neon-cyan);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 8px var(--neon-cyan);
+        }
+
+        /* Geri Dön Butonu */
+        .back-btn {
+            position: absolute;
+            bottom: 2rem;
+            left: 2rem;
+            background: none;
+            border: 1px solid var(--neon-magenta);
+            color: var(--neon-magenta);
+            font-family: inherit;
+            font-size: 1rem;
+            font-weight: bold;
+            padding: 0.6rem 1.2rem;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            letter-spacing: 1px;
+        }
+
+        .back-btn:hover {
+            background: var(--neon-magenta);
+            color: #000;
+            box-shadow: 0 0 15px var(--neon-magenta);
+        }
+
+        /* --- GLITCH ANİMASYONU --- */
         @keyframes glitch {
             0%, 100% { transform: none; transform: skew(0deg); }
             45% { transform: none; transform: skew(0deg); }
@@ -205,9 +400,10 @@
 </head>
 <body>
 
+    <div class="grid-bg"></div>
+
     <div class="loading-screen" id="loadingScreen">
         <div class="studio-logo">BILAL STUDIOS</div>
-        
         <div class="loader-container" id="loaderContainer">
             <div class="progress-bar" id="progressBar"></div>
         </div>
@@ -223,56 +419,193 @@
         <div class="menu-container">
             <div class="menu-item"><i class="fa-solid fa-play"></i> OYUNA BAŞLA</div>
             <div class="menu-item"><i class="fa-solid fa-floppy-disk"></i> KAYDI YÜKLE</div>
-            <div class="menu-item"><i class="fa-solid fa-gear"></i> AYARLAR</div>
+            <div class="menu-item" id="openSettingsBtn"><i class="fa-solid fa-gear"></i> AYARLAR</div>
             <div class="menu-item" style="color: rgba(255,0,85,0.6);"><i class="fa-solid fa-power-off"></i> ÇIKIŞ</div>
         </div>
     </div>
 
+    <div class="settings-panel" id="settingsPanel">
+        
+        <div class="settings-tabs">
+            <h3>// CONTROL_PANEL</h3>
+            <button class="tab-btn active" onclick="switchTab(event, 'graphics')"><i class="fa-solid fa-desktop"></i> GRAFİKLER</button>
+            <button class="tab-btn" onclick="switchTab(event, 'audio')"><i class="fa-solid fa-volume-high"></i> SESLER</button>
+            <button class="tab-btn" onclick="switchTab(event, 'controls')"><i class="fa-solid fa-gamepad"></i> KONTROLLER</button>
+            <button class="tab-btn" onclick="switchTab(event, 'general')"><i class="fa-solid fa-sliders"></i> GENEL</button>
+            
+            <button class="back-btn" id="closeSettingsBtn"><i class="fa-solid fa-arrow-left"></i> GERİ DÖN</button>
+        </div>
+
+        <div class="settings-content">
+            
+            <div id="graphics" class="tab-content active">
+                <div class="setting-row">
+                    <div class="setting-label">
+                        <span class="setting-title">Çözünürlük</span>
+                        <span class="setting-desc">Ekran boyut kalitesini belirler.</span>
+                    </div>
+                    <div class="setting-control">
+                        <select>
+                            <option>1920x1080 (16:9)</option>
+                            <option>2560x1440 (2K)</option>
+                            <option>3840x2160 (4K)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="setting-row">
+                    <div class="setting-label">
+                        <span class="setting-title">Ray Tracing</span>
+                        <span class="setting-desc">Işık ve yansıma kalitesini fütüristik yapar.</span>
+                    </div>
+                    <div class="setting-control">
+                        <select><option>KAPALI</option><option selected>AÇIK (ULTRA)</option></select>
+                    </div>
+                </div>
+                <div class="setting-row">
+                    <div class="setting-label">
+                        <span class="setting-title">Kare Hızı Sınırı (FPS)</span>
+                        <span class="setting-desc">Maksimum akıcılık limitini seçin.</span>
+                    </div>
+                    <div class="setting-control">
+                        <select><option>60 FPS</option><option>144 FPS</option><option selected>SINIRSIZ</option></select>
+                    </div>
+                </div>
+            </div>
+
+            <div id="audio" class="tab-content">
+                <div class="setting-row">
+                    <div class="setting-label">
+                        <span class="setting-title">Ana Ses Seviyesi</span>
+                        <span class="setting-desc">Oyunun genel ses perdesi.</span>
+                    </div>
+                    <div class="setting-control">
+                        <input type="range" min="0" max="100" value="80">
+                    </div>
+                </div>
+                <div class="setting-row">
+                    <div class="setting-label">
+                        <span class="setting-title">Müzik Ses Seviyesi</span>
+                        <span class="setting-desc">Arka plandaki Synthwave müzik şiddeti.</span>
+                    </div>
+                    <div class="setting-control">
+                        <input type="range" min="0" max="100" value="60">
+                    </div>
+                </div>
+            </div>
+
+            <div id="controls" class="tab-content">
+                <div class="setting-row">
+                    <div class="setting-label">
+                        <span class="setting-title">Mouse Hassasiyeti</span>
+                        <span class="setting-desc">Dönüş hızınızı ayarlar.</span>
+                    </div>
+                    <div class="setting-control">
+                        <input type="range" min="1" max="10" value="5" step="0.1">
+                    </div>
+                </div>
+                <div class="setting-row">
+                    <div class="setting-label">
+                        <span class="setting-title">Giriş Cihazı</span>
+                        <span class="setting-desc">Varsayılan kontrolcü şeması.</span>
+                    </div>
+                    <div class="setting-control">
+                        <select><option>Klavye & Mouse</option><option>Xbox Controller</option><option>DualSense (PS5)</option></select>
+                    </div>
+                </div>
+            </div>
+
+            <div id="general" class="tab-content">
+                <div class="setting-row">
+                    <div class="setting-label">
+                        <span class="setting-title">Dil (Language)</span>
+                        <span class="setting-desc">Arayüz ve alt yazı dili.</span>
+                    </div>
+                    <div class="setting-control">
+                        <select><option selected>Türkçe</option><option>English</option><option>Deutsch</option></select>
+                    </div>
+                </div>
+                <div class="setting-row">
+                    <div class="setting-label">
+                        <span class="setting-title">Crossplay</span>
+                        <span class="setting-desc">Diğer platformdaki oyuncularla eşleşme.</span>
+                    </div>
+                    <div class="setting-control">
+                        <select><option selected>AKTİF</option><option>PASİF</option></select>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
     <script>
-        // Tarayıcının DOM'u tamamen hazırlamasını garanti altına alıyoruz
         window.addEventListener('DOMContentLoaded', () => {
             const progressBar = document.getElementById('progressBar');
             const loaderContainer = document.getElementById('loaderContainer');
             const loadingText = document.getElementById('loadingText');
             const loadingScreen = document.getElementById('loadingScreen');
             const mainMenu = document.getElementById('mainMenu');
+            
+            const settingsPanel = document.getElementById('settingsPanel');
+            const openSettingsBtn = document.getElementById('openSettingsBtn');
+            const closeSettingsBtn = document.getElementById('closeSettingsBtn');
 
             let progress = 0;
 
-            // 1. Aşama: Yükleme çubuğunun dolmaya başlaması
+            // --- 1. SİNEMATİK GİRİŞ AKIŞI ---
             const loadingInterval = setInterval(() => {
-                // Her adımda dinamik ve rastgele artış hızı
                 progress += Math.floor(Math.random() * 6) + 2; 
-                
                 if (progress >= 100) {
                     progress = 100;
                     clearInterval(loadingInterval);
-                    onLoadingComplete(); // %100 olunca sonraki aşamaya geç
+                    onLoadingComplete();
                 }
-                
                 progressBar.style.width = progress + '%';
             }, 100);
 
-            // 2. Aşama: Çubuğun dolması bittiğinde tetiklenen alan
             function onLoadingComplete() {
                 loadingText.innerText = "Yükleme Tamamlandı";
-                
-                // Yükleme çizgisi ve alt metin 400ms içinde pürüzsüzce kayboluyor
                 setTimeout(() => {
                     loaderContainer.classList.add('hide-bar');
                     loadingText.style.opacity = '0';
                 }, 400);
 
-                // 3. Aşama: Çizgi yok olduktan sonra BİLAL STUDIOS yazısı 1.8 saniye daha ekranda kalıyor
                 setTimeout(() => {
-                    // Yükleme ekranı 1.5 saniyelik sinematik fade-out ile kapanıyor
                     loadingScreen.classList.add('fade-out');
-                    
-                    // Ana menü aynı pürüzsüzlükte arka plandan öne doğru geliyor
                     mainMenu.classList.add('show-menu');
-                }, 2200); // 400ms bar kaybolma + 1800ms ekstra bekleme süresi
+                }, 2200);
             }
+
+            // --- 2. AYARLAR PANELİ AÇILIŞ/KAPANIŞ KONTROLLERİ ---
+            openSettingsBtn.addEventListener('click', () => {
+                mainMenu.classList.add('slide-out'); // Menüyü yana kaydırıp gizle
+                setTimeout(() => {
+                    settingsPanel.classList.add('open'); // Ayarlar panelini ekrana getir
+                }, 300);
+            });
+
+            closeSettingsBtn.addEventListener('click', () => {
+                settingsPanel.classList.remove('open'); // Ayarlar panelini kapat
+                setTimeout(() => {
+                    mainMenu.classList.remove('slide-out'); // Menüyü eski yerine çağır
+                }, 300);
+            });
         });
+
+        // --- 3. SEKMELER ARASI GEÇİŞ FONKSİYONU ---
+        function switchTab(event, tabId) {
+            // Tüm içerikleri gizle
+            const contents = document.querySelectorAll('.tab-content');
+            contents.forEach(content => content.classList.remove('active'));
+
+            // Tüm butonların aktiflik durumunu temizle
+            const buttons = document.querySelectorAll('.tab-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+
+            // Tıklanan tabı ve butonunu aktifleştir
+            document.getElementById(tabId).classList.add('active');
+            event.currentTarget.classList.add('active');
+        }
     </script>
 </body>
 </html>
