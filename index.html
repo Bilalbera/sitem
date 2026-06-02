@@ -39,12 +39,14 @@
             width: 100%;
             height: 100%;
             background-color: #020205;
-            z-index: 999;
+            z-index: 9999; /* Menünün tamamen üstünde kalması için yükseltildi */
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            transition: opacity 1.5s ease-in-out, visibility 1.5s; /* Yavaşça kapanma animasyonu */
+            opacity: 1;
+            visibility: visible;
+            transition: opacity 1.5s ease-in-out, visibility 1.5s ease-in-out;
         }
 
         /* Ekran kapanırken tetiklenecek class */
@@ -72,6 +74,7 @@
             border-radius: 50px;
             border: 1px solid rgba(255, 255, 255, 0.1);
             position: relative;
+            opacity: 1;
             transition: opacity 0.5s ease;
         }
 
@@ -81,7 +84,7 @@
         }
 
         .progress-bar {
-            width: 0%; /* JS ile doldurulacak */
+            width: 0%; /* JS sıfırdan başlatacak */
             height: 8px;
             background: linear-gradient(90deg, var(--neon-magenta), var(--neon-cyan));
             border-radius: 50px;
@@ -95,6 +98,7 @@
             color: #555;
             margin-top: 10px;
             text-transform: uppercase;
+            transition: opacity 0.5s ease;
         }
 
         /* ==========================================================================
@@ -112,7 +116,7 @@
             background-size: 40px 40px;
             opacity: 0;
             transform: scale(1.05);
-            transition: all 2s ease-in-out;
+            transition: all 2s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         /* Giriş ekranı bitince menünün canlanması için */
@@ -225,47 +229,50 @@
     </div>
 
     <script>
-        const progressBar = document.getElementById('progressBar');
-        const loaderContainer = document.getElementById('loaderContainer');
-        const loadingText = document.getElementById('loadingText');
-        const loadingScreen = document.getElementById('loadingScreen');
-        const mainMenu = document.getElementById('mainMenu');
+        // Tarayıcının DOM'u tamamen hazırlamasını garanti altına alıyoruz
+        window.addEventListener('DOMContentLoaded', () => {
+            const progressBar = document.getElementById('progressBar');
+            const loaderContainer = document.getElementById('loaderContainer');
+            const loadingText = document.getElementById('loadingText');
+            const loadingScreen = document.getElementById('loadingScreen');
+            const mainMenu = document.getElementById('mainMenu');
 
-        let progress = 0;
+            let progress = 0;
 
-        // 1. Adım: Yükleme çubuğunu doldurma simülasyonu
-        const loadingInterval = setInterval(() => {
-            // Rastgele hızlarda dolsun ki gerçekçi dursun
-            progress += Math.floor(Math.random() * 8) + 2; 
-            
-            if (progress >= 100) {
-                progress = 100;
-                clearInterval(loadingInterval);
-                onLoadingComplete(); // Yükleme bittiğinde tetikle
-            }
-            
-            progressBar.style.width = progress + '%';
-        }, 150);
-
-        // 2. Adım: Yükleme bittiğinde çalışacak fonksiyon
-        function onLoadingComplete() {
-            loadingText.innerText = "Yükleme Tamamlandı";
-            
-            // İstediğin gibi: Yükleme çizgisi kayboluyor
-            setTimeout(() => {
-                loaderContainer.classList.add('hide-bar');
-                loadingText.style.opacity = '0';
-            }, 400);
-
-            // 3. Adım: Çizgi gittikten sonra BİLAL STUDIOS yazısı 1.8 saniye daha kalıyor
-            setTimeout(() => {
-                // Ekran yavaşça (CSS transition ile 1.5 saniyede) kapanıyor
-                loadingScreen.classList.add('fade-out');
+            // 1. Aşama: Yükleme çubuğunun dolmaya başlaması
+            const loadingInterval = setInterval(() => {
+                // Her adımda dinamik ve rastgele artış hızı
+                progress += Math.floor(Math.random() * 6) + 2; 
                 
-                // Aynı anda arkadaki ana menü yavaşça canlanarak geliyor
-                mainMenu.classList.add('show-menu');
-            }, 2200); // 400ms bar gizleme + 1800ms ekstra bekleme süresi
-        }
+                if (progress >= 100) {
+                    progress = 100;
+                    clearInterval(loadingInterval);
+                    onLoadingComplete(); // %100 olunca sonraki aşamaya geç
+                }
+                
+                progressBar.style.width = progress + '%';
+            }, 100);
+
+            // 2. Aşama: Çubuğun dolması bittiğinde tetiklenen alan
+            function onLoadingComplete() {
+                loadingText.innerText = "Yükleme Tamamlandı";
+                
+                // Yükleme çizgisi ve alt metin 400ms içinde pürüzsüzce kayboluyor
+                setTimeout(() => {
+                    loaderContainer.classList.add('hide-bar');
+                    loadingText.style.opacity = '0';
+                }, 400);
+
+                // 3. Aşama: Çizgi yok olduktan sonra BİLAL STUDIOS yazısı 1.8 saniye daha ekranda kalıyor
+                setTimeout(() => {
+                    // Yükleme ekranı 1.5 saniyelik sinematik fade-out ile kapanıyor
+                    loadingScreen.classList.add('fade-out');
+                    
+                    // Ana menü aynı pürüzsüzlükte arka plandan öne doğru geliyor
+                    mainMenu.classList.add('show-menu');
+                }, 2200); // 400ms bar kaybolma + 1800ms ekstra bekleme süresi
+            }
+        });
     </script>
 </body>
 </html>
