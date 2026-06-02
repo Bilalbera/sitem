@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bilal Studios - Project Neo</title>
+    <title>Bilal Studios - Project Neo v0.8</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -11,7 +11,7 @@
             --neon-magenta: #ff0055;
             --bg-dark: #05050a;
             --text-main: #ffffff;
-            --panel-bg: rgba(7, 7, 15, 0.9);
+            --panel-bg: rgba(7, 7, 15, 0.95);
         }
 
         * {
@@ -47,7 +47,7 @@
             align-items: center;
             opacity: 1;
             visibility: visible;
-            transition: opacity 1.5s ease-in-out, visibility 1.5s ease-in-out;
+            transition: opacity 1.2s ease-in-out, visibility 1.2s ease-in-out;
         }
 
         .loading-screen.fade-out {
@@ -74,7 +74,7 @@
             border: 1px solid rgba(255, 255, 255, 0.1);
             position: relative;
             opacity: 1;
-            transition: opacity 0.5s ease;
+            transition: opacity 0.4s ease;
         }
 
         .loader-container.hide-bar {
@@ -96,7 +96,7 @@
             color: #555;
             margin-top: 10px;
             text-transform: uppercase;
-            transition: opacity 0.5s ease;
+            transition: opacity 0.4s ease;
         }
 
         /* ==========================================================================
@@ -123,7 +123,7 @@
             padding-left: 10%;
             opacity: 0;
             transform: scale(1.05);
-            transition: all 1.5s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: all 1.2s cubic-bezier(0.16, 1, 0.3, 1);
             z-index: 5;
             position: relative;
         }
@@ -133,7 +133,6 @@
             transform: scale(1);
         }
 
-        /* Menü Gizleme Sınıfı (Ayarlar açılınca menü sola kaysın) */
         .main-menu-content.slide-out {
             opacity: 0;
             transform: translateX(-100px);
@@ -208,23 +207,23 @@
         }
 
         /* ==========================================================================
-           3. MEGA GELİŞMİŞ AYARLAR MENÜSÜ (SETTINGS PANEL)
+           3. MEGA GELİŞMİŞ AYARLAR MENÜSÜ & AKORDEON (DROPDOWN) SİSTEMİ
            ========================================================================== */
         .settings-panel {
             position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -45%) scale(0.95);
-            width: 80%;
-            max-width: 1000px;
-            height: 75vh;
+            width: 85%;
+            max-width: 1100px;
+            height: 80vh;
             background: var(--panel-bg);
             border: 1px solid rgba(0, 240, 255, 0.2);
-            box-shadow: 0 0 40px rgba(0, 240, 255, 0.1);
+            box-shadow: 0 0 40px rgba(0, 240, 255, 0.15);
             border-radius: 12px;
             z-index: 10;
             display: grid;
-            grid-template-columns: 250px 1fr; /* Sol taraf kategori, sağ taraf içerik */
+            grid-template-columns: 280px 1fr;
             opacity: 0;
             visibility: hidden;
             transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
@@ -236,13 +235,13 @@
             transform: translate(-50%, -50%) scale(1);
         }
 
-        /* Ayarlar Sol Menü (Kategoriler) */
         .settings-tabs {
             border-right: 1px solid rgba(255, 255, 255, 0.05);
             padding: 2rem 1rem;
             display: flex;
             flex-direction: column;
             gap: 0.8rem;
+            position: relative;
         }
 
         .settings-tabs h3 {
@@ -273,7 +272,7 @@
 
         .tab-btn:hover, .tab-btn.active {
             color: #fff;
-            background: rgba(0, 240, 255, 0.1);
+            background: rgba(0, 240, 255, 0.08);
             text-shadow: 0 0 5px var(--neon-cyan);
         }
 
@@ -281,30 +280,44 @@
             border-left: 3px solid var(--neon-cyan);
         }
 
-        /* Ayarlar Sağ Bölüm (İçerikler) */
         .settings-content {
             padding: 3rem;
             overflow-y: auto;
             position: relative;
+            padding-bottom: 5rem; /* Footer çakışmasın diye alan */
         }
 
         .tab-content {
             display: none;
             flex-direction: column;
-            gap: 2rem;
+            gap: 1rem;
         }
 
         .tab-content.active {
             display: flex;
         }
 
-        /* Ayar Satırları Tasarımı */
-        .setting-row {
+        /* --- SÜPER DÜPER AKORDEON (AŞAĞI KAYAN) SATIR YAPISI --- */
+        .setting-accordion {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .setting-accordion:hover {
+            border-color: rgba(0, 240, 255, 0.3);
+            background: rgba(0, 240, 255, 0.01);
+        }
+
+        /* Tıklanan Üst Başlık Kısmı */
+        .accordion-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            padding: 1.2rem;
+            cursor: pointer;
         }
 
         .setting-label {
@@ -324,16 +337,63 @@
             color: #666;
         }
 
-        /* İnteraktif Elemanlar (Slider, Select, Switch) */
+        /* Sağdaki interaktif ok */
+        .accordion-icon {
+            font-size: 0.9rem;
+            color: var(--neon-cyan);
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* Aşağı Kayarak Açılan Gizli Kontrol Alanı */
+        .accordion-body {
+            max-height: 0;
+            overflow: hidden;
+            padding: 0 1.2rem;
+            opacity: 0;
+            transition: max-height 0.4s cubic-bezier(0.16, 1, 0.3, 1), padding 0.4s ease, opacity 0.3s ease;
+            background: rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            border-top: 1px solid transparent;
+        }
+
+        /* Aktif (Açık) Akordeon Sınıfları */
+        .setting-accordion.expanded {
+            border-color: rgba(0, 240, 255, 0.5);
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.05);
+        }
+
+        .setting-accordion.expanded .accordion-icon {
+            transform: rotate(180deg);
+            color: var(--neon-magenta);
+        }
+
+        .setting-accordion.expanded .accordion-body {
+            max-height: 100px; /* İçeriğin rahat sığacağı yükseklik */
+            padding: 1.2rem;
+            opacity: 1;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        /* Kontrol Elemanları */
+        .setting-control {
+            width: 100%;
+            display: flex;
+            justify-content: flex-start;
+        }
+
         .setting-control select {
             background: #111;
             color: #fff;
             border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 0.5rem 1rem;
+            padding: 0.6rem 1.5rem;
             font-family: inherit;
             border-radius: 4px;
             outline: none;
             cursor: pointer;
+            width: 100%;
+            max-width: 300px;
+            letter-spacing: 1px;
         }
 
         .setting-control select:focus {
@@ -342,7 +402,8 @@
 
         .setting-control input[type="range"] {
             -webkit-appearance: none;
-            width: 150px;
+            width: 100%;
+            max-width: 300px;
             background: rgba(255, 255, 255, 0.1);
             height: 6px;
             border-radius: 5px;
@@ -357,6 +418,18 @@
             border-radius: 50%;
             cursor: pointer;
             box-shadow: 0 0 8px var(--neon-cyan);
+        }
+
+        /* Ekran Kartı Bilgilendirme Rozeti */
+        .gpu-badge {
+            font-size: 0.7rem;
+            background: rgba(0, 240, 255, 0.15);
+            color: var(--neon-cyan);
+            padding: 2px 6px;
+            border-radius: 3px;
+            margin-top: 4px;
+            display: inline-block;
+            max-width: fit-content;
         }
 
         /* Geri Dön Butonu */
@@ -386,7 +459,30 @@
             box-shadow: 0 0 15px var(--neon-magenta);
         }
 
-        /* --- GLITCH ANİMASYONU --- */
+        /* --- YENİ EKLENEN SUB-FOOTER (BİLAL STUDIOS İMZASI) --- */
+        .settings-footer {
+            position: absolute;
+            bottom: 1.5rem;
+            right: 2rem;
+            text-align: right;
+            opacity: 0.4;
+            pointer-events: none;
+        }
+
+        .settings-footer .studio-name {
+            font-size: 0.85rem;
+            font-weight: bold;
+            letter-spacing: 2px;
+            color: #fff;
+        }
+
+        .settings-footer .version-num {
+            font-size: 0.7rem;
+            letter-spacing: 1px;
+            color: var(--neon-magenta);
+            margin-top: 2px;
+        }
+
         @keyframes glitch {
             0%, 100% { transform: none; transform: skew(0deg); }
             45% { transform: none; transform: skew(0deg); }
@@ -412,15 +508,15 @@
 
     <div class="main-menu-content" id="mainMenu">
         <div class="game-header">
-            <h1 class="game-title">PROJECT: NEO</h1>
-            <div class="game-subtitle">// EARLY ACCESS 2026</div>
+            <h1 class="game-title" id="loc-gameTitle">PROJECT: NEO</h1>
+            <div class="game-subtitle" id="loc-gameSubtitle">// EARLY ACCESS 2026</div>
         </div>
 
         <div class="menu-container">
-            <div class="menu-item"><i class="fa-solid fa-play"></i> OYUNA BAŞLA</div>
-            <div class="menu-item"><i class="fa-solid fa-floppy-disk"></i> KAYDI YÜKLE</div>
+            <div class="menu-item" id="loc-btnStart"><i class="fa-solid fa-play"></i> OYUNA BAŞLA</div>
+            <div class="menu-item" id="loc-btnLoad"><i class="fa-solid fa-floppy-disk"></i> KAYDI YÜKLE</div>
             <div class="menu-item" id="openSettingsBtn"><i class="fa-solid fa-gear"></i> AYARLAR</div>
-            <div class="menu-item" style="color: rgba(255,0,85,0.6);"><i class="fa-solid fa-power-off"></i> ÇIKIŞ</div>
+            <div class="menu-item" style="color: rgba(255,0,85,0.6);" id="loc-btnExit"><i class="fa-solid fa-power-off"></i> ÇIKIŞ</div>
         </div>
     </div>
 
@@ -428,10 +524,10 @@
         
         <div class="settings-tabs">
             <h3>// CONTROL_PANEL</h3>
-            <button class="tab-btn active" onclick="switchTab(event, 'graphics')"><i class="fa-solid fa-desktop"></i> GRAFİKLER</button>
-            <button class="tab-btn" onclick="switchTab(event, 'audio')"><i class="fa-solid fa-volume-high"></i> SESLER</button>
-            <button class="tab-btn" onclick="switchTab(event, 'controls')"><i class="fa-solid fa-gamepad"></i> KONTROLLER</button>
-            <button class="tab-btn" onclick="switchTab(event, 'general')"><i class="fa-solid fa-sliders"></i> GENEL</button>
+            <button class="tab-btn active" onclick="switchTab(event, 'graphics')" id="loc-tabGraphics"><i class="fa-solid fa-desktop"></i> GRAFİKLER</button>
+            <button class="tab-btn" onclick="switchTab(event, 'audio')" id="loc-tabAudio"><i class="fa-solid fa-volume-high"></i> SESLER</button>
+            <button class="tab-btn" onclick="switchTab(event, 'controls')" id="loc-tabControls"><i class="fa-solid fa-gamepad"></i> KONTROLLER</button>
+            <button class="tab-btn" onclick="switchTab(event, 'general')" id="loc-tabGeneral"><i class="fa-solid fa-sliders"></i> GENEL</button>
             
             <button class="back-btn" id="closeSettingsBtn"><i class="fa-solid fa-arrow-left"></i> GERİ DÖN</button>
         </div>
@@ -439,107 +535,252 @@
         <div class="settings-content">
             
             <div id="graphics" class="tab-content active">
-                <div class="setting-row">
-                    <div class="setting-label">
-                        <span class="setting-title">Çözünürlük</span>
-                        <span class="setting-desc">Ekran boyut kalitesini belirler.</span>
+                <div class="setting-accordion" onclick="toggleAccordion(this)">
+                    <div class="accordion-header">
+                        <div class="setting-label">
+                            <span class="setting-title" id="loc-resTitle">Çözünürlük</span>
+                            <span class="setting-desc" id="loc-resDesc">Ekran boyut kalitesini belirler.</span>
+                            <span class="gpu-badge" id="detectedGpu">Tespit Edilen GPU: Araştırılıyor...</span>
+                        </div>
+                        <i class="fa-solid fa-chevron-down accordion-icon"></i>
                     </div>
-                    <div class="setting-control">
-                        <select>
-                            <option>1920x1080 (16:9)</option>
-                            <option>2560x1440 (2K)</option>
-                            <option>3840x2160 (4K)</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="setting-row">
-                    <div class="setting-label">
-                        <span class="setting-title">Ray Tracing</span>
-                        <span class="setting-desc">Işık ve yansıma kalitesini fütüristik yapar.</span>
-                    </div>
-                    <div class="setting-control">
-                        <select><option>KAPALI</option><option selected>AÇIK (ULTRA)</option></select>
+                    <div class="accordion-body" onclick="event.stopPropagation()">
+                        <div class="setting-control">
+                            <select id="resolutionSelect">
+                                </select>
+                        </div>
                     </div>
                 </div>
-                <div class="setting-row">
-                    <div class="setting-label">
-                        <span class="setting-title">Kare Hızı Sınırı (FPS)</span>
-                        <span class="setting-desc">Maksimum akıcılık limitini seçin.</span>
+                <div class="setting-accordion" onclick="toggleAccordion(this)">
+                    <div class="accordion-header">
+                        <div class="setting-label">
+                            <span class="setting-title" id="loc-rtTitle">Ray Tracing</span>
+                            <span class="setting-desc" id="loc-rtDesc">Işık ve yansıma kalitesini fütüristik yapar.</span>
+                        </div>
+                        <i class="fa-solid fa-chevron-down accordion-icon"></i>
                     </div>
-                    <div class="setting-control">
-                        <select><option>60 FPS</option><option>144 FPS</option><option selected>SINIRSIZ</option></select>
+                    <div class="accordion-body" onclick="event.stopPropagation()">
+                        <div class="setting-control">
+                            <select><option id="loc-optOff">KAPALI</option><option selected id="loc-optOn">AÇIK (ULTRA)</option></select>
+                        </div>
+                    </div>
+                </div>
+                <div class="setting-accordion" onclick="toggleAccordion(this)">
+                    <div class="accordion-header">
+                        <div class="setting-label">
+                            <span class="setting-title" id="loc-shadowTitle">Gölge Kalitesi</span>
+                            <span class="setting-desc" id="loc-shadowDesc">Gölgelerin kenar yumuşatma oranını ayarlar.</span>
+                        </div>
+                        <i class="fa-solid fa-chevron-down accordion-icon"></i>
+                    </div>
+                    <div class="accordion-body" onclick="event.stopPropagation()">
+                        <div class="setting-control">
+                            <select><option id="loc-optLow">Düşük</option><option selected id="loc-optMed">Orta</option><option id="loc-optHigh">Destansı</option></select>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <div id="audio" class="tab-content">
-                <div class="setting-row">
-                    <div class="setting-label">
-                        <span class="setting-title">Ana Ses Seviyesi</span>
-                        <span class="setting-desc">Oyunun genel ses perdesi.</span>
+                <div class="setting-accordion" onclick="toggleAccordion(this)">
+                    <div class="accordion-header">
+                        <div class="setting-label">
+                            <span class="setting-title" id="loc-masterVolTitle">Ana Ses Seviyesi</span>
+                            <span class="setting-desc" id="loc-masterVolDesc">Oyunun genel ses perdesi.</span>
+                        </div>
+                        <i class="fa-solid fa-chevron-down accordion-icon"></i>
                     </div>
-                    <div class="setting-control">
-                        <input type="range" min="0" max="100" value="80">
+                    <div class="accordion-body" onclick="event.stopPropagation()">
+                        <div class="setting-control"><input type="range" min="0" max="100" value="80"></div>
                     </div>
                 </div>
-                <div class="setting-row">
-                    <div class="setting-label">
-                        <span class="setting-title">Müzik Ses Seviyesi</span>
-                        <span class="setting-desc">Arka plandaki Synthwave müzik şiddeti.</span>
+                <div class="setting-accordion" onclick="toggleAccordion(this)">
+                    <div class="accordion-header">
+                        <div class="setting-label">
+                            <span class="setting-title" id="loc-voiceChatTitle">Sesli Sohbet</span>
+                            <span class="setting-desc" id="loc-voiceChatDesc">Takım arkadaşlarınızla mikrofon iletişimi.</span>
+                        </div>
+                        <i class="fa-solid fa-chevron-down accordion-icon"></i>
                     </div>
-                    <div class="setting-control">
-                        <input type="range" min="0" max="100" value="60">
+                    <div class="accordion-body" onclick="event.stopPropagation()">
+                        <div class="setting-control">
+                            <select><option id="loc-optActive">AKTİF</option><option id="loc-optPassive">PASİF</option></select>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <div id="controls" class="tab-content">
-                <div class="setting-row">
-                    <div class="setting-label">
-                        <span class="setting-title">Mouse Hassasiyeti</span>
-                        <span class="setting-desc">Dönüş hızınızı ayarlar.</span>
+                <div class="setting-accordion" onclick="toggleAccordion(this)">
+                    <div class="accordion-header">
+                        <div class="setting-label">
+                            <span class="setting-title" id="loc-mouseTitle">Mouse Hassasiyeti</span>
+                            <span class="setting-desc" id="loc-mouseDesc">Dönüş hızınızı ayarlar.</span>
+                        </div>
+                        <i class="fa-solid fa-chevron-down accordion-icon"></i>
                     </div>
-                    <div class="setting-control">
-                        <input type="range" min="1" max="10" value="5" step="0.1">
+                    <div class="accordion-body" onclick="event.stopPropagation()">
+                        <div class="setting-control"><input type="range" min="1" max="10" value="5" step="0.1"></div>
                     </div>
                 </div>
-                <div class="setting-row">
-                    <div class="setting-label">
-                        <span class="setting-title">Giriş Cihazı</span>
-                        <span class="setting-desc">Varsayılan kontrolcü şeması.</span>
+                <div class="setting-accordion" onclick="toggleAccordion(this)">
+                    <div class="accordion-header">
+                        <div class="setting-label">
+                            <span class="setting-title" id="loc-vibeTitle">Kontrolcü Titreşimi</span>
+                            <span class="setting-desc" id="loc-vibeDesc">Gamepad darbelerindeki haptik geri bildirim.</span>
+                        </div>
+                        <i class="fa-solid fa-chevron-down accordion-icon"></i>
                     </div>
-                    <div class="setting-control">
-                        <select><option>Klavye & Mouse</option><option>Xbox Controller</option><option>DualSense (PS5)</option></select>
+                    <div class="accordion-body" onclick="event.stopPropagation()">
+                        <div class="setting-control">
+                            <select><option id="loc-optOn2">AÇIK</option><option id="loc-optOff2">KAPALI</option></select>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <div id="general" class="tab-content">
-                <div class="setting-row">
-                    <div class="setting-label">
-                        <span class="setting-title">Dil (Language)</span>
-                        <span class="setting-desc">Arayüz ve alt yazı dili.</span>
+                <div class="setting-accordion" onclick="toggleAccordion(this)">
+                    <div class="accordion-header">
+                        <div class="setting-label">
+                            <span class="setting-title" id="loc-langTitle">Dil (Language)</span>
+                            <span class="setting-desc" id="loc-langDesc">Arayüz ve alt yazı dili.</span>
+                        </div>
+                        <i class="fa-solid fa-chevron-down accordion-icon"></i>
                     </div>
-                    <div class="setting-control">
-                        <select><option selected>Türkçe</option><option>English</option><option>Deutsch</option></select>
+                    <div class="accordion-body" onclick="event.stopPropagation()">
+                        <div class="setting-control">
+                            <select id="languageSelect" onchange="changeLanguage(this.value)">
+                                <option value="tr" selected>Türkçe</option>
+                                <option value="en">English</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
-                <div class="setting-row">
-                    <div class="setting-label">
-                        <span class="setting-title">Crossplay</span>
-                        <span class="setting-desc">Diğer platformdaki oyuncularla eşleşme.</span>
+                <div class="setting-accordion" onclick="toggleAccordion(this)">
+                    <div class="accordion-header">
+                        <div class="setting-label">
+                            <span class="setting-title" id="loc-fovTitle">Görüş Alanı (FOV)</span>
+                            <span class="setting-desc" id="loc-fovDesc">Kameranın görüş açısı genişliği.</span>
+                        </div>
+                        <i class="fa-solid fa-chevron-down accordion-icon"></i>
                     </div>
-                    <div class="setting-control">
-                        <select><option selected>AKTİF</option><option>PASİF</option></select>
+                    <div class="accordion-body" onclick="event.stopPropagation()">
+                        <div class="setting-control"><input type="range" min="70" max="110" value="90"></div>
                     </div>
                 </div>
+            </div>
+
+            <div class="settings-footer">
+                <div class="studio-name">BILAL STUDIOS</div>
+                <div class="version-num">Versiyon 0.8</div>
             </div>
 
         </div>
     </div>
 
     <script>
+        // --- 1. DİL VERİ TABANI (i18n ENGINE) ---
+        const localization = {
+            tr: {
+                gameTitle: "PROJECT: NEO", gameSubtitle: "// EARLY ACCESS 2026",
+                btnStart: "<i class='fa-solid fa-play'></i> OYUNA BAŞLA", btnLoad: "<i class='fa-solid fa-floppy-disk'></i> KAYDI YÜKLE", btnExit: "<i class='fa-solid fa-power-off'></i> ÇIKIŞ",
+                tabGraphics: "<i class='fa-solid fa-desktop'></i> GRAFİKLER", tabAudio: "<i class='fa-solid fa-volume-high'></i> SESLER", tabControls: "<i class='fa-solid fa-gamepad'></i> KONTROLLER", tabGeneral: "<i class='fa-solid fa-sliders'></i> GENEL",
+                resTitle: "Çözünürlük", resDesc: "Ekran boyut kalitesini belirler.",
+                rtTitle: "Ray Tracing", rtDesc: "Işık ve yansıma kalitesini fütüristik yapar.",
+                shadowTitle: "Gölge Kalitesi", shadowDesc: "Gölgelerin kenar yumuşatma oranını ayarlar.",
+                masterVolTitle: "Ana Ses Seviyesi", masterVolDesc: "Oyunun genel ses perdesi.",
+                voiceChatTitle: "Sesli Sohbet", voiceChatDesc: "Takım arkadaşlarınızla mikrofon iletişimi.",
+                mouseTitle: "Mouse Hassasiyeti", mouseDesc: "Dönüş hızınızı ayarlar.",
+                vibeTitle: "Kontrolcü Titreşimi", vibeDesc: "Gamepad darbelerindeki haptik geri bildirim.",
+                langTitle: "Dil (Language)", langDesc: "Arayüz ve alt yazı dili.",
+                fovTitle: "Görüş Alanı (FOV)", fovDesc: "Kameranın görüş açısı genişliği.",
+                optOff: "KAPALI", optOn: "AÇIK (ULTRA)", optLow: "Düşük", optMed: "Orta", optHigh: "Destansı", optActive: "AKTİF", optPassive: "PASİF", optOn2: "AÇIK", optOff2: "KAPALI"
+            },
+            en: {
+                gameTitle: "PROJECT: NEO", gameSubtitle: "// EARLY ACCESS 2026",
+                btnStart: "<i class='fa-solid fa-play'></i> START GAME", btnLoad: "<i class='fa-solid fa-floppy-disk'></i> LOAD GAME", btnExit: "<i class='fa-solid fa-power-off'></i> QUIT TO DESKTOP",
+                tabGraphics: "<i class='fa-solid fa-desktop'></i> GRAPHICS", tabAudio: "<i class='fa-solid fa-volume-high'></i> AUDIO", tabControls: "<i class='fa-solid fa-gamepad'></i> CONTROLS", tabGeneral: "<i class='fa-solid fa-sliders'></i> GENERAL",
+                resTitle: "Resolution", resDesc: "Determines the display size quality.",
+                rtTitle: "Ray Tracing", rtDesc: "Makes lighting and reflections futuristic.",
+                shadowTitle: "Shadow Quality", shadowDesc: "Adjusts the anti-aliasing rate of shadows.",
+                masterVolTitle: "Master Volume", masterVolDesc: "Overall sound pitch of the game.",
+                voiceChatTitle: "Voice Chat", voiceChatDesc: "Microphone communication with team.",
+                mouseTitle: "Mouse Sensitivity", mouseDesc: "Adjusts your rotation speed.",
+                vibeTitle: "Controller Vibration", vibeDesc: "Haptic feedback on gamepad impacts.",
+                langTitle: "Language (Dil)", langDesc: "Interface and subtitle language.",
+                fovTitle: "Field of View (FOV)", fovDesc: "Width of the camera viewing angle.",
+                optOff: "OFF", optOn: "ON (ULTRA)", optLow: "Low", optMed: "Medium", optHigh: "Epic", optActive: "ACTIVE", optPassive: "PASSIVE", optOn2: "ON", optOff2: "OFF"
+            }
+        };
+
+        function changeLanguage(lang) {
+            const data = localization[lang];
+            for (let key in data) {
+                const el = document.getElementById('loc-' + key);
+                if (el) el.innerHTML = data[key];
+            }
+        }
+
+        // --- 2. AKORDEON (AŞAĞI KAYMA) TETİKLEYİCİSİ ---
+        function toggleAccordion(element) {
+            // Açık olan diğer akordeonlar varsa onları pürüzsüzce kapat
+            const allAccordions = document.querySelectorAll('.setting-accordion');
+            allAccordions.forEach(acc => {
+                if (acc !== element && acc.classList.contains('expanded')) {
+                    acc.classList.remove('expanded');
+                }
+            });
+            // Tıklananı aç veya kapat
+            element.classList.toggle('expanded');
+        }
+
+        // --- 3. DONANIM TABANLI EKRAN KARTINDAN ÇÖZÜNÜRÜLÜK KISITLAMA ENGINE ---
+        function detectGPUAndSetupResolutions() {
+            const gpuBadge = document.getElementById('detectedGpu');
+            const resSelect = document.getElementById('resolutionSelect');
+            
+            let gpuName = "Standard Display Device";
+            let isHighEnd = false;
+
+            try {
+                const canvas = document.createElement('canvas');
+                const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+                if (gl) {
+                    const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+                    if (debugInfo) {
+                        gpuName = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
+                    }
+                }
+            } catch (e) { console.log("GPU detection blocked."); }
+
+            gpuBadge.innerText = `GPU: ${gpuName}`;
+
+            // Ekran kartı harici/güçlü bir model mi kontrol et
+            if (gpuName.includes("RTX") || gpuName.includes("GTX") || gpuName.includes("Radeon") || gpuName.includes("R9") || gpuName.includes("DirectX")) {
+                isHighEnd = true;
+            }
+
+            // Çözünürlükleri ekran kartına göre sınırla
+            if (isHighEnd) {
+                resSelect.innerHTML = `
+                    <option selected>1920x1080 (Full HD - 16:9)</option>
+                    <option>2560x1440 (Quad HD - 2K)</option>
+                    <option>3840x2160 (Ultra HD - 4K)</option>
+                `;
+            } else {
+                // Güçsüz veya entegre kartsa maksimum 1080p ver, daha yukarı taşıyıp kastırma
+                resSelect.innerHTML = `
+                    <option>1280x720 (HD Ready)</option>
+                    <option selected>1920x1080 (Full HD)</option>
+                `;
+            }
+        }
+
+        // --- 4. ANA SİNEMATİK AKIŞ VE PENCERE KONTROLLERİ ---
         window.addEventListener('DOMContentLoaded', () => {
+            detectGPUAndSetupResolutions();
+
             const progressBar = document.getElementById('progressBar');
             const loaderContainer = document.getElementById('loaderContainer');
             const loadingText = document.getElementById('loadingText');
@@ -552,57 +793,51 @@
 
             let progress = 0;
 
-            // --- 1. SİNEMATİK GİRİŞ AKIŞI ---
+            // Yükleme çubuğu dolum simülasyonu
             const loadingInterval = setInterval(() => {
-                progress += Math.floor(Math.random() * 6) + 2; 
+                progress += Math.floor(Math.random() * 7) + 3; 
                 if (progress >= 100) {
                     progress = 100;
                     clearInterval(loadingInterval);
                     onLoadingComplete();
                 }
                 progressBar.style.width = progress + '%';
-            }, 100);
+            }, 80);
 
             function onLoadingComplete() {
                 loadingText.innerText = "Yükleme Tamamlandı";
                 setTimeout(() => {
                     loaderContainer.classList.add('hide-bar');
                     loadingText.style.opacity = '0';
-                }, 400);
+                }, 300);
 
+                // İSTEDİĞİN GİBİ: 1 saniye kısaltılmış (1200ms) sinematik geçiş süresi
                 setTimeout(() => {
                     loadingScreen.classList.add('fade-out');
                     mainMenu.classList.add('show-menu');
-                }, 2200);
+                }, 1200); 
             }
 
-            // --- 2. AYARLAR PANELİ AÇILIŞ/KAPANIŞ KONTROLLERİ ---
+            // Panel Açılış/Kapanış Animasyon Tetikçileri
             openSettingsBtn.addEventListener('click', () => {
-                mainMenu.classList.add('slide-out'); // Menüyü yana kaydırıp gizle
-                setTimeout(() => {
-                    settingsPanel.classList.add('open'); // Ayarlar panelini ekrana getir
-                }, 300);
+                mainMenu.classList.add('slide-out');
+                setTimeout(() => { settingsPanel.classList.add('open'); }, 250);
             });
 
             closeSettingsBtn.addEventListener('click', () => {
-                settingsPanel.classList.remove('open'); // Ayarlar panelini kapat
-                setTimeout(() => {
-                    mainMenu.classList.remove('slide-out'); // Menüyü eski yerine çağır
-                }, 300);
+                settingsPanel.classList.remove('open');
+                setTimeout(() => { mainMenu.classList.remove('slide-out'); }, 250);
             });
         });
 
-        // --- 3. SEKMELER ARASI GEÇİŞ FONKSİYONU ---
+        // Sekme Değiştirici
         function switchTab(event, tabId) {
-            // Tüm içerikleri gizle
             const contents = document.querySelectorAll('.tab-content');
             contents.forEach(content => content.classList.remove('active'));
 
-            // Tüm butonların aktiflik durumunu temizle
             const buttons = document.querySelectorAll('.tab-btn');
             buttons.forEach(btn => btn.classList.remove('active'));
 
-            // Tıklanan tabı ve butonunu aktifleştir
             document.getElementById(tabId).classList.add('active');
             event.currentTarget.classList.add('active');
         }
