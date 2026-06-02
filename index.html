@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Süper Düper Game Menu</title>
-    <!-- İkonlar için FontAwesome -->
+    <title>Bilal Studios - Project Neo</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -24,41 +23,108 @@
         body {
             background-color: var(--bg-dark);
             color: var(--text-main);
-            font-family: 'Courier New', Courier, monospace; /* Retro-fütüristik hava için */
+            font-family: 'Courier New', Courier, monospace;
             overflow: hidden;
+            height: 100vh;
+            position: relative;
+        }
+
+        /* ==========================================================================
+           1. YÜKLENME EKRANI (LOADING SCREEN)
+           ========================================================================== */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #020205;
+            z-index: 999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 1.5s ease-in-out, visibility 1.5s; /* Yavaşça kapanma animasyonu */
+        }
+
+        /* Ekran kapanırken tetiklenecek class */
+        .loading-screen.fade-out {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .studio-logo {
+            font-size: 4rem;
+            font-weight: 900;
+            letter-spacing: 8px;
+            text-transform: uppercase;
+            color: #fff;
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.6);
+            margin-bottom: 3rem;
+            text-align: center;
+        }
+
+        /* Yükleme Çubuğu Alanı */
+        .loader-container {
+            width: 300px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 4px;
+            border-radius: 50px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            transition: opacity 0.5s ease;
+        }
+
+        /* Çubuk dolunca sadece barı gizlemek için kullanılacak */
+        .loader-container.hide-bar {
+            opacity: 0;
+        }
+
+        .progress-bar {
+            width: 0%; /* JS ile doldurulacak */
+            height: 8px;
+            background: linear-gradient(90deg, var(--neon-magenta), var(--neon-cyan));
+            border-radius: 50px;
+            box-shadow: 0 0 10px var(--neon-cyan);
+            transition: width 0.1s linear;
+        }
+
+        .loading-text {
+            font-size: 0.8rem;
+            letter-spacing: 3px;
+            color: #555;
+            margin-top: 10px;
+            text-transform: uppercase;
+        }
+
+        /* ==========================================================================
+           2. ANA MENÜ (MAIN MENU)
+           ========================================================================== */
+        .main-menu-content {
             height: 100vh;
             display: flex;
             align-items: center;
             justify-content: flex-start;
             padding-left: 10%;
-            /* Arka plan siber ızgara (Grid) efekti */
             background-image: 
                 linear-gradient(to right, rgba(0, 240, 255, 0.03) 1px, transparent 1px),
                 linear-gradient(to bottom, rgba(0, 240, 255, 0.03) 1px, transparent 1px);
             background-size: 40px 40px;
-            position: relative;
+            opacity: 0;
+            transform: scale(1.05);
+            transition: all 2s ease-in-out;
         }
 
-        /* Arka plandaki devasa neon ışık süzmesi */
-        body::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            right: -10%;
-            transform: translateY(-50%);
-            width: 600px;
-            height: 600px;
-            background: radial-gradient(circle, rgba(255, 0, 85, 0.15) 0%, transparent 70%);
-            z-index: 0;
-            pointer-events: none;
+        /* Giriş ekranı bitince menünün canlanması için */
+        .main-menu-content.show-menu {
+            opacity: 1;
+            transform: scale(1);
         }
 
-        /* Oyun Başlığı (Logo Area) */
         .game-header {
             position: absolute;
             top: 10%;
             left: 10%;
-            z-index: 2;
         }
 
         .game-title {
@@ -66,10 +132,7 @@
             font-weight: 900;
             letter-spacing: 5px;
             text-transform: uppercase;
-            color: #fff;
-            text-shadow: 
-                0 0 10px var(--neon-cyan),
-                0 0 20px var(--neon-cyan);
+            text-shadow: 0 0 10px var(--neon-cyan), 0 0 20px var(--neon-cyan);
             animation: glitch 3s infinite;
         }
 
@@ -82,16 +145,13 @@
             opacity: 0.8;
         }
 
-        /* Menü Listesi Konteyneri */
         .menu-container {
             display: flex;
             flex-direction: column;
             gap: 1.2rem;
-            z-index: 2;
             margin-top: 5rem;
         }
 
-        /* Ortak Menü Linki Stili */
         .menu-item {
             font-size: 1.8rem;
             font-weight: bold;
@@ -104,21 +164,17 @@
             gap: 1.5rem;
             cursor: pointer;
             transition: all 0.2s ease-in-out;
-            position: relative;
             padding: 0.5rem 1rem;
             border-left: 4px solid transparent;
         }
 
-        /* Hover Etkisi (Oyuncu seçeneğin üstüne geldiğinde) */
         .menu-item:hover {
             color: #fff;
             border-left: 4px solid var(--neon-cyan);
             padding-left: 2rem;
             background: linear-gradient(to right, rgba(0, 240, 255, 0.08), transparent);
-            text-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
         }
 
-        /* Seçim İkonu */
         .menu-item i {
             font-size: 1.2rem;
             color: var(--neon-magenta);
@@ -130,25 +186,8 @@
         .menu-item:hover i {
             opacity: 1;
             transform: translateX(0);
-            animation: pulse 1s infinite alternate;
         }
 
-        /* Alt Bilgi Skoru / Sürüm */
-        .game-footer {
-            position: absolute;
-            bottom: 5%;
-            left: 10%;
-            font-size: 0.8rem;
-            color: rgba(255, 255, 255, 0.3);
-            display: flex;
-            gap: 2rem;
-        }
-
-        .system-status {
-            color: var(--neon-cyan);
-        }
-
-        /* --- ANİMASYONLAR --- */
         @keyframes glitch {
             0%, 100% { transform: none; transform: skew(0deg); }
             45% { transform: none; transform: skew(0deg); }
@@ -158,98 +197,74 @@
             49% { transform: skew(3deg); }
             50% { transform: none; }
         }
-
-        @keyframes pulse {
-            from { transform: scale(1); opacity: 0.7; }
-            to { transform: scale(1.3); opacity: 1; }
-        }
-
-        /* Tıklama Efekti İçin Flash Sınıfı */
-        .flash-active {
-            background: var(--neon-magenta) !important;
-            color: #000 !important;
-            box-shadow: 0 0 30px var(--neon-magenta);
-        }
     </style>
 </head>
 <body>
 
-    <!-- Oyun Başlığı -->
-    <div class="game-header">
-        <h1 class="game-title">PROJECT: NEO</h1>
-        <div class="game-subtitle">// EARLY ACCESS 2026</div>
+    <div class="loading-screen" id="loadingScreen">
+        <div class="studio-logo">BILAL STUDIOS</div>
+        
+        <div class="loader-container" id="loaderContainer">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+        <div class="loading-text" id="loadingText">Sistemler Yükleniyor...</div>
     </div>
 
-    <!-- Oyun Menü Linkleri -->
-    <div class="menu-container">
-        <div class="menu-item" onclick="selectOption('START GAME')">
-            <i class="fa-solid fa-play"></i> OYUNA BAŞLA
+    <div class="main-menu-content" id="mainMenu">
+        <div class="game-header">
+            <h1 class="game-title">PROJECT: NEO</h1>
+            <div class="game-subtitle">// EARLY ACCESS 2026</div>
         </div>
-        <div class="menu-item" onclick="selectOption('LOAD GAME')">
-            <i class="fa-solid fa-floppy-disk"></i> KAYDI YÜKLE
-        </div>
-        <div class="menu-item" onclick="selectOption('MULTIPLAYER')">
-            <i class="fa-solid fa-globe"></i> ÇEVRİMİÇİ ODALAR
-        </div>
-        <div class="menu-item" onclick="selectOption('SETTINGS')">
-            <i class="fa-solid fa-gear"></i> AYARLAR
-        </div>
-        <div class="menu-item" onclick="selectOption('CREDITS')">
-            <i class="fa-solid fa-users"></i> YAPIMCILAR
-        </div>
-        <div class="menu-item" style="color: rgba(255,0,85,0.6);" onclick="selectOption('EXIT')">
-            <i class="fa-solid fa-power-off"></i> MASAÜSTÜNE DÖN
+
+        <div class="menu-container">
+            <div class="menu-item"><i class="fa-solid fa-play"></i> OYUNA BAŞLA</div>
+            <div class="menu-item"><i class="fa-solid fa-floppy-disk"></i> KAYDI YÜKLE</div>
+            <div class="menu-item"><i class="fa-solid fa-gear"></i> AYARLAR</div>
+            <div class="menu-item" style="color: rgba(255,0,85,0.6);"><i class="fa-solid fa-power-off"></i> ÇIKIŞ</div>
         </div>
     </div>
 
-    <!-- Alt Veriler -->
-    <div class="game-footer">
-        <div>SERVER STATUS: <span class="system-status">ONLINE [EU-WEST]</span></div>
-        <div>VERSION: v0.98.4-ALPHA</div>
-    </div>
-
-    <!-- Menü Ses ve Tıklama Scripti -->
     <script>
-        // Oyun içi etkileşim hissi yaratmak için Web Audio API kullanarak yapay "BİP" sesleri üretelim
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const progressBar = document.getElementById('progressBar');
+        const loaderContainer = document.getElementById('loaderContainer');
+        const loadingText = document.getElementById('loadingText');
+        const loadingScreen = document.getElementById('loadingScreen');
+        const mainMenu = document.getElementById('mainMenu');
 
-        function playSound(freq, type, duration) {
-            const oscillator = audioCtx.createOscillator();
-            const gainNode = audioCtx.createGain();
-            
-            oscillator.type = type;
-            oscillator.frequency.value = freq;
-            
-            gainNode.gain.setValueAtTime(0.05, audioCtx.currentTime); // Sesi çok açıp kulak tırmalamasın
-            gainNode.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + duration);
-            
-            oscillator.connect(gainNode);
-            gainNode.connect(audioCtx.destination);
-            
-            oscillator.start();
-            oscillator.stop(audioCtx.currentTime + duration);
-        }
+        let progress = 0;
 
-        // Menü elemanlarının üzerine gelince siber "bip" sesi çıksın
-        const menuItems = document.querySelectorAll('.menu-item');
-        menuItems.forEach(item => {
-            item.addEventListener('mouseenter', () => {
-                playSound(800, 'square', 0.05);
-            });
-        });
+        // 1. Adım: Yükleme çubuğunu doldurma simülasyonu
+        const loadingInterval = setInterval(() => {
+            // Rastgele hızlarda dolsun ki gerçekçi dursun
+            progress += Math.floor(Math.random() * 8) + 2; 
+            
+            if (progress >= 100) {
+                progress = 100;
+                clearInterval(loadingInterval);
+                onLoadingComplete(); // Yükleme bittiğinde tetikle
+            }
+            
+            progressBar.style.width = progress + '%';
+        }, 150);
 
-        // Seçeneğe tıklayınca arcade patlama/onaylama efekti
-        function selectOption(optionName) {
-            playSound(400, 'sawtooth', 0.3);
+        // 2. Adım: Yükleme bittiğinde çalışacak fonksiyon
+        function onLoadingComplete() {
+            loadingText.innerText = "Yükleme Tamamlandı";
             
-            // Tıklanan elemanı bul ve flash efekti ver
-            const eventTarget = event.currentTarget;
-            eventTarget.classList.add('flash-active');
-            
+            // İstediğin gibi: Yükleme çizgisi kayboluyor
             setTimeout(() => {
-                eventTarget.classList.remove('flash-active');
-                alert(`"${optionName}" Modu Başlatılıyor...`);
-            }, 200);
+                loaderContainer.classList.add('hide-bar');
+                loadingText.style.opacity = '0';
+            }, 400);
+
+            // 3. Adım: Çizgi gittikten sonra BİLAL STUDIOS yazısı 1.8 saniye daha kalıyor
+            setTimeout(() => {
+                // Ekran yavaşça (CSS transition ile 1.5 saniyede) kapanıyor
+                loadingScreen.classList.add('fade-out');
+                
+                // Aynı anda arkadaki ana menü yavaşça canlanarak geliyor
+                mainMenu.classList.add('show-menu');
+            }, 2200); // 400ms bar gizleme + 1800ms ekstra bekleme süresi
         }
     </script>
 </body>
