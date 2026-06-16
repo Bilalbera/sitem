@@ -3,534 +3,584 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bilal Studios - Project Neo</title>
+    <title>Bilal Studios - Project Neo [ULTIMATE]</title>
+    <!-- Google Fonts: Rajdhani for Sci-Fi look, Roboto Mono for Terminal -->
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700;800&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
         :root {
             --neon-cyan: #00f0ff;
             --neon-magenta: #ff0055;
-            --bg-dark: #05050a;
-            --text-main: #ffffff;
-            --panel-bg: rgba(7, 7, 15, 0.9);
+            --neon-purple: #b026ff;
+            --neon-green: #00ff66;
+            --neon-yellow: #ffea00;
+            --bg-dark: #030305;
+            --text-main: #e0f2fe;
+            --panel-bg: rgba(5, 5, 12, 0.75);
+            --border-glow-cyan: 0 0 10px rgba(0, 240, 255, 0.5), inset 0 0 10px rgba(0, 240, 255, 0.2);
+            --border-glow-magenta: 0 0 10px rgba(255, 0, 85, 0.5), inset 0 0 10px rgba(255, 0, 85, 0.2);
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            user-select: none;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
 
         body {
             background-color: var(--bg-dark);
             color: var(--text-main);
-            font-family: 'Courier New', Courier, monospace;
+            font-family: 'Rajdhani', sans-serif;
             overflow: hidden;
             height: 100vh;
             position: relative;
+            perspective: 1000px;
         }
 
-        /* ==========================================================================
-           1. YÜKLENME EKRANI (LOADING SCREEN)
-           ========================================================================== */
+        .scanlines {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            background-size: 100% 4px, 3px 100%;
+            pointer-events: none; z-index: 999; opacity: 0.6;
+        }
+
+        .cyber-grid-wrapper {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            overflow: hidden; z-index: 1;
+            background: radial-gradient(circle at center, #0a0a1a 0%, #000 100%);
+        }
+
+        .cyber-grid {
+            position: absolute; bottom: -50%; left: -50%; width: 200%; height: 200%;
+            background-image: linear-gradient(to right, rgba(0, 240, 255, 0.05) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(0, 240, 255, 0.05) 1px, transparent 1px);
+            background-size: 50px 50px; transform: rotateX(75deg);
+            transform-origin: center center; animation: gridMove 15s linear infinite;
+        }
+
+        @keyframes gridMove { 0% { transform: rotateX(75deg) translateY(0); } 100% { transform: rotateX(75deg) translateY(50px); } }
+
+        .vignette {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            box-shadow: inset 0 0 250px rgba(0,0,0,0.95); z-index: 2; pointer-events: none;
+        }
+
+        .hud-element {
+            position: absolute; z-index: 4; font-family: 'Roboto Mono', monospace;
+            color: var(--neon-cyan); font-size: 0.85rem; letter-spacing: 1px;
+            background: rgba(0, 240, 255, 0.05); padding: 5px 15px;
+            border: 1px solid rgba(0, 240, 255, 0.2);
+            backdrop-filter: blur(5px); transition: all 0.3s ease;
+        }
+
+        .hud-top-left { top: 20px; left: 20px; border-left: 3px solid var(--neon-cyan); clip-path: polygon(0 0, 100% 0, calc(100% - 10px) 100%, 0 100%); padding-right: 25px; }
+        .hud-top-right { top: 20px; right: 20px; border-right: 3px solid var(--neon-magenta); color: var(--neon-magenta); border-color: rgba(255, 0, 85, 0.2); background: rgba(255, 0, 85, 0.05); clip-path: polygon(10px 0, 100% 0, 100% 100%, 0 100%); padding-left: 25px; }
+        .hud-bottom-right { bottom: 20px; right: 20px; border-right: 3px solid var(--neon-cyan); clip-path: polygon(10px 0, 100% 0, 100% 100%, 0 100%); padding-left: 25px; font-size: 1.2rem; }
+        
+        .terminal-container {
+            position: absolute; bottom: 20px; left: 20px; width: 300px; height: 150px;
+            z-index: 4; font-family: 'Roboto Mono', monospace; font-size: 0.75rem;
+            color: rgba(0, 240, 255, 0.6); overflow: hidden;
+            background: linear-gradient(180deg, transparent, rgba(0,0,0,0.8));
+            mask-image: linear-gradient(to bottom, transparent, black 20%);
+            -webkit-mask-image: linear-gradient(to bottom, transparent, black 20%);
+        }
+        .terminal-log { display: flex; flex-direction: column; justify-content: flex-end; height: 100%; }
+        .terminal-line { margin-bottom: 2px; text-shadow: 0 0 5px rgba(0, 240, 255, 0.3); }
+        .terminal-line.error { color: var(--neon-magenta); text-shadow: 0 0 5px rgba(255, 0, 85, 0.3); }
+        .terminal-line.success { color: var(--neon-green); }
+
         .loading-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: #020205;
-            z-index: 9999;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            opacity: 1;
-            visibility: visible;
-            transition: opacity 1.5s ease-in-out, visibility 1.5s ease-in-out;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: #010103; z-index: 9999;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            transition: opacity 1s cubic-bezier(0.86, 0, 0.07, 1), visibility 1s;
         }
-
-        .loading-screen.fade-out {
-            opacity: 0;
-            visibility: hidden;
-        }
+        .loading-screen.fade-out { opacity: 0; visibility: hidden; }
 
         .studio-logo {
-            font-size: 4rem;
-            font-weight: 900;
-            letter-spacing: 8px;
-            text-transform: uppercase;
-            color: #fff;
-            text-shadow: 0 0 15px rgba(255, 255, 255, 0.6);
-            margin-bottom: 3rem;
-            text-align: center;
+            font-size: 5rem; font-weight: 800; letter-spacing: 15px; text-transform: uppercase; color: #fff;
+            text-shadow: 0 0 20px rgba(0, 240, 255, 0.8), 0 0 40px var(--neon-magenta);
+            margin-bottom: 4rem; position: relative;
+            animation: glitch 4s infinite, float 4s ease-in-out infinite;
         }
+
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
 
         .loader-container {
-            width: 300px;
-            background: rgba(255, 255, 255, 0.05);
-            padding: 4px;
-            border-radius: 50px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            position: relative;
-            opacity: 1;
-            transition: opacity 0.5s ease;
-        }
-
-        .loader-container.hide-bar {
-            opacity: 0;
+            width: 400px; background: rgba(255, 255, 255, 0.02); padding: 6px;
+            border: 1px solid rgba(0, 240, 255, 0.3); position: relative; box-shadow: var(--border-glow-cyan);
+            clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
         }
 
         .progress-bar {
-            width: 0%;
-            height: 8px;
-            background: linear-gradient(90deg, var(--neon-magenta), var(--neon-cyan));
-            border-radius: 50px;
-            box-shadow: 0 0 10px var(--neon-cyan);
-            transition: width 0.1s linear;
+            width: 0%; height: 12px; background: linear-gradient(90deg, var(--neon-magenta), var(--neon-cyan));
+            box-shadow: 0 0 15px var(--neon-cyan); transition: width 0.1s ease; position: relative;
+        }
+        .progress-bar::after {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(0,0,0,0.2) 10px, rgba(0,0,0,0.2) 20px);
+            background-size: 28px 28px; animation: stripeMove 1s linear infinite;
         }
 
-        .loading-text {
-            font-size: 0.8rem;
-            letter-spacing: 3px;
-            color: #555;
-            margin-top: 10px;
-            text-transform: uppercase;
-            transition: opacity 0.5s ease;
-        }
+        @keyframes stripeMove { 100% { background-position: 28px 0; } }
 
-        /* ==========================================================================
-           2. ANA OYUN MENÜSÜ & ARKA PLAN
-           ========================================================================== */
-        .grid-bg {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: 
-                linear-gradient(to right, rgba(0, 240, 255, 0.03) 1px, transparent 1px),
-                linear-gradient(to bottom, rgba(0, 240, 255, 0.03) 1px, transparent 1px);
-            background-size: 40px 40px;
-            z-index: 1;
-        }
+        .loading-info { display: flex; justify-content: space-between; width: 400px; margin-top: 15px; font-weight: 600; letter-spacing: 4px; color: var(--neon-cyan); }
+        .loading-text { text-transform: uppercase; animation: blink 1.5s infinite; }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
 
         .main-menu-content {
-            height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: flex-start;
-            padding-left: 10%;
-            opacity: 0;
-            transform: scale(1.05);
-            transition: all 1.5s cubic-bezier(0.16, 1, 0.3, 1);
-            z-index: 5;
-            position: relative;
+            height: 100vh; display: flex; flex-direction: column; justify-content: center;
+            padding-left: 10%; opacity: 0; transform: scale(1.1);
+            transition: all 1.5s cubic-bezier(0.19, 1, 0.22, 1);
+            z-index: 5; position: relative;
         }
 
-        .main-menu-content.show-menu {
-            opacity: 1;
-            transform: scale(1);
-        }
+        .main-menu-content.show-menu { opacity: 1; transform: scale(1); }
+        .main-menu-content.slide-out { opacity: 0; transform: translateX(-150px) scale(0.95); pointer-events: none; }
 
-        /* Menü Gizleme Sınıfı (Ayarlar açılınca menü sola kaysın) */
-        .main-menu-content.slide-out {
-            opacity: 0;
-            transform: translateX(-100px);
-            pointer-events: none;
-        }
-
-        .game-header {
-            position: absolute;
-            top: 10%;
-            left: 10%;
-        }
-
+        .game-header { margin-bottom: 3rem; }
         .game-title {
-            font-size: 3.5rem;
-            font-weight: 900;
-            letter-spacing: 5px;
-            text-transform: uppercase;
-            text-shadow: 0 0 10px var(--neon-cyan), 0 0 20px var(--neon-cyan);
-            animation: glitch 3s infinite;
+            font-size: 6.5rem; font-weight: 800; letter-spacing: 10px; line-height: 1; text-transform: uppercase; color: #fff;
+            text-shadow: 3px 3px 0px var(--neon-magenta), -3px -3px 0px var(--neon-cyan), 0 0 40px rgba(0, 240, 255, 0.6);
+            display: inline-block; margin-bottom: 10px;
         }
 
         .game-subtitle {
-            font-size: 0.9rem;
-            letter-spacing: 8px;
-            color: var(--neon-magenta);
-            text-transform: uppercase;
-            margin-top: 5px;
-            opacity: 0.8;
+            font-size: 1.2rem; font-weight: 600; letter-spacing: 12px; color: var(--neon-magenta); text-transform: uppercase;
+            display: flex; align-items: center; gap: 15px;
         }
+        .game-subtitle::before { content: ''; display: block; width: 50px; height: 2px; background: var(--neon-cyan); box-shadow: 0 0 10px var(--neon-cyan); }
 
-        .menu-container {
-            display: flex;
-            flex-direction: column;
-            gap: 1.2rem;
-            margin-top: 5rem;
-        }
+        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; max-width: 900px; }
+        .menu-column { display: flex; flex-direction: column; gap: 1rem; }
 
         .menu-item {
-            font-size: 1.8rem;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 3px;
-            color: rgba(255, 255, 255, 0.6);
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 1.5rem;
-            cursor: pointer;
-            transition: all 0.2s ease-in-out;
-            padding: 0.5rem 1rem;
-            border-left: 4px solid transparent;
+            font-size: 1.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 3px;
+            color: rgba(255, 255, 255, 0.7); display: flex; align-items: center; gap: 1.5rem;
+            cursor: pointer; padding: 1rem 1.5rem; position: relative; background: rgba(0,0,0,0.5);
+            border-left: 4px solid rgba(255,255,255,0.1);
+            clip-path: polygon(0 0, calc(100% - 15px) 0, 100% 15px, 100% 100%, 0 100%);
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); overflow: hidden; width: 100%;
         }
 
-        .menu-item:hover {
-            color: #fff;
-            border-left: 4px solid var(--neon-cyan);
-            padding-left: 2rem;
-            background: linear-gradient(to right, rgba(0, 240, 255, 0.08), transparent);
+        .menu-item::before {
+            content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 240, 255, 0.2), transparent);
+            transition: left 0.5s ease; z-index: -1;
         }
 
-        .menu-item i {
-            font-size: 1.2rem;
-            color: var(--neon-magenta);
-            opacity: 0;
-            transform: translateX(-10px);
-            transition: all 0.2s ease-in-out;
+        .menu-item:hover, .menu-item.active {
+            color: #fff; border-left: 4px solid var(--neon-cyan); padding-left: 2.5rem;
+            background: rgba(0, 240, 255, 0.1); box-shadow: inset 0 0 20px rgba(0, 240, 255, 0.2); text-shadow: 0 0 10px var(--neon-cyan);
+        }
+        .menu-item:hover::before { left: 100%; }
+        
+        .menu-item.danger:hover {
+            border-left-color: var(--neon-magenta); background: rgba(255, 0, 85, 0.1);
+            box-shadow: inset 0 0 20px rgba(255, 0, 85, 0.2); text-shadow: 0 0 10px var(--neon-magenta);
+        }
+        .menu-item.gold:hover {
+            border-left-color: var(--neon-yellow); background: rgba(255, 234, 0, 0.1);
+            box-shadow: inset 0 0 20px rgba(255, 234, 0, 0.2); text-shadow: 0 0 10px var(--neon-yellow);
         }
 
-        .menu-item:hover i {
-            opacity: 1;
-            transform: translateX(0);
-        }
+        .menu-item i { font-size: 1.3rem; color: var(--neon-cyan); opacity: 0; transform: translateX(-20px); transition: all 0.3s ease; }
+        .menu-item.danger i { color: var(--neon-magenta); }
+        .menu-item.gold i { color: var(--neon-yellow); }
+        .menu-item:hover i, .menu-item.active i { opacity: 1; transform: translateX(0); }
 
-        /* ==========================================================================
-           3. MEGA GELİŞMİŞ AYARLAR MENÜSÜ (SETTINGS PANEL)
-           ========================================================================== */
         .settings-panel {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -45%) scale(0.95);
-            width: 80%;
-            max-width: 1000px;
-            height: 75vh;
-            background: var(--panel-bg);
-            border: 1px solid rgba(0, 240, 255, 0.2);
-            box-shadow: 0 0 40px rgba(0, 240, 255, 0.1);
-            border-radius: 12px;
-            z-index: 10;
-            display: grid;
-            grid-template-columns: 250px 1fr; /* Sol taraf kategori, sağ taraf içerik */
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -45%) scale(0.9);
+            width: 85%; max-width: 1400px; height: 85vh; background: var(--panel-bg); backdrop-filter: blur(20px);
+            border: 1px solid rgba(0, 240, 255, 0.3); box-shadow: 0 0 60px rgba(0, 240, 255, 0.15), inset 0 0 30px rgba(0, 0, 0, 0.9);
+            clip-path: polygon(40px 0, 100% 0, 100% calc(100% - 40px), calc(100% - 40px) 100%, 0 100%, 0 40px);
+            z-index: 10; display: grid; grid-template-columns: 320px 1fr;
+            opacity: 0; visibility: hidden; transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1);
         }
+        .settings-panel.open { opacity: 1; visibility: visible; transform: translate(-50%, -50%) scale(1); }
+        .settings-panel::after { content: ''; position: absolute; top: -1px; left: 40px; width: 120px; height: 3px; background: var(--neon-cyan); box-shadow: 0 0 15px var(--neon-cyan); }
 
-        .settings-panel.open {
-            opacity: 1;
-            visibility: visible;
-            transform: translate(-50%, -50%) scale(1);
-        }
-
-        /* Ayarlar Sol Menü (Kategoriler) */
-        .settings-tabs {
-            border-right: 1px solid rgba(255, 255, 255, 0.05);
-            padding: 2rem 1rem;
-            display: flex;
-            flex-direction: column;
-            gap: 0.8rem;
-        }
-
-        .settings-tabs h3 {
-            font-size: 1rem;
-            color: var(--neon-cyan);
-            letter-spacing: 3px;
-            margin-bottom: 1.5rem;
-            padding-left: 0.5rem;
-        }
+        .settings-tabs { background: rgba(0, 0, 0, 0.5); border-right: 1px solid rgba(0, 240, 255, 0.2); padding: 3rem 2rem; display: flex; flex-direction: column; gap: 0.8rem; position: relative; }
+        .settings-tabs h3 { font-size: 1.3rem; color: var(--neon-magenta); letter-spacing: 5px; margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px dashed rgba(255, 0, 85, 0.3); display: flex; align-items: center; gap: 10px; }
 
         .tab-btn {
-            background: none;
-            border: none;
-            color: rgba(255, 255, 255, 0.5);
-            font-family: inherit;
-            font-size: 1.1rem;
-            font-weight: bold;
-            text-align: left;
-            padding: 0.8rem 1rem;
-            cursor: pointer;
-            letter-spacing: 2px;
-            border-radius: 6px;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
+            background: transparent; border: 1px solid transparent; color: rgba(255, 255, 255, 0.5);
+            font-family: inherit; font-size: 1.2rem; font-weight: 600; text-align: left;
+            padding: 1rem 1.2rem; cursor: pointer; letter-spacing: 2px; transition: all 0.3s;
+            display: flex; align-items: center; gap: 1rem; text-transform: uppercase;
+            clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
         }
+        .tab-btn:hover { background: rgba(0, 240, 255, 0.05); color: #fff; border: 1px solid rgba(0, 240, 255, 0.2); }
+        .tab-btn.active { color: var(--bg-dark); background: var(--neon-cyan); border-color: var(--neon-cyan); box-shadow: 0 0 15px rgba(0, 240, 255, 0.5); font-weight: 800; }
+        .tab-btn.active i { color: var(--bg-dark); }
 
-        .tab-btn:hover, .tab-btn.active {
-            color: #fff;
-            background: rgba(0, 240, 255, 0.1);
-            text-shadow: 0 0 5px var(--neon-cyan);
-        }
+        .settings-content { padding: 3rem 4rem; overflow-y: auto; position: relative; }
+        .settings-content::-webkit-scrollbar { width: 6px; }
+        .settings-content::-webkit-scrollbar-track { background: rgba(0,0,0,0.5); }
+        .settings-content::-webkit-scrollbar-thumb { background: var(--neon-cyan); border-radius: 3px; }
 
-        .tab-btn.active {
-            border-left: 3px solid var(--neon-cyan);
-        }
+        .tab-content { display: none; flex-direction: column; gap: 2rem; animation: fadeIn 0.4s ease-out forwards; }
+        .tab-content.active { display: flex; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Ayarlar Sağ Bölüm (İçerikler) */
-        .settings-content {
-            padding: 3rem;
-            overflow-y: auto;
-            position: relative;
-        }
+        .tab-header { font-size: 2.2rem; color: #fff; letter-spacing: 4px; margin-bottom: 0.5rem; text-transform: uppercase; border-bottom: 2px solid rgba(255,255,255,0.1); padding-bottom: 10px; }
 
-        .tab-content {
-            display: none;
-            flex-direction: column;
-            gap: 2rem;
-        }
+        .setting-row { display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; background: rgba(255,255,255,0.02); border: 1px solid transparent; transition: all 0.3s; }
+        .setting-row:hover { background: rgba(0, 240, 255, 0.03); border: 1px solid rgba(0, 240, 255, 0.1); }
+        .setting-row:hover .setting-title { color: var(--neon-cyan); }
 
-        .tab-content.active {
-            display: flex;
-        }
+        .setting-label { display: flex; flex-direction: column; gap: 0.4rem; width: 60%; }
+        .setting-title { font-size: 1.3rem; font-weight: 700; letter-spacing: 1px; transition: color 0.3s; }
+        .setting-desc { font-size: 0.9rem; color: #888; font-weight: 500; }
 
-        /* Ayar Satırları Tasarımı */
-        .setting-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
-        }
+        .setting-control { display: flex; align-items: center; gap: 15px; width: 40%; justify-content: flex-end; }
 
-        .setting-label {
-            display: flex;
-            flex-direction: column;
-            gap: 0.3rem;
-        }
-
-        .setting-title {
-            font-size: 1.1rem;
-            font-weight: bold;
-            letter-spacing: 1px;
-        }
-
-        .setting-desc {
-            font-size: 0.8rem;
-            color: #666;
-        }
-
-        /* İnteraktif Elemanlar (Slider, Select, Switch) */
         .setting-control select {
-            background: #111;
-            color: #fff;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 0.5rem 1rem;
-            font-family: inherit;
-            border-radius: 4px;
-            outline: none;
-            cursor: pointer;
+            background: rgba(0, 0, 0, 0.8); color: var(--neon-cyan); font-weight: 600;
+            border: 1px solid var(--neon-cyan); padding: 0.8rem 1rem; font-family: inherit; font-size: 1rem;
+            outline: none; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; width: 100%;
+            box-shadow: inset 0 0 10px rgba(0, 240, 255, 0.1); transition: all 0.3s; appearance: none;
         }
+        .setting-control select:hover, .setting-control select:focus { background: rgba(0, 240, 255, 0.1); box-shadow: 0 0 15px rgba(0, 240, 255, 0.3); }
+        .setting-control select option { background: var(--bg-dark); color: #fff; }
 
-        .setting-control select:focus {
-            border-color: var(--neon-cyan);
-        }
+        /* Özel Toggle Switch */
+        .switch { position: relative; display: inline-block; width: 60px; height: 30px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(255,255,255,0.1); transition: .4s; border: 1px solid rgba(255,255,255,0.3); }
+        .slider:before { position: absolute; content: ""; height: 22px; width: 22px; left: 3px; bottom: 3px; background-color: #888; transition: .4s; }
+        input:checked + .slider { background-color: rgba(0, 240, 255, 0.2); border-color: var(--neon-cyan); box-shadow: 0 0 10px rgba(0, 240, 255, 0.5); }
+        input:checked + .slider:before { transform: translateX(30px); background-color: var(--neon-cyan); box-shadow: 0 0 10px var(--neon-cyan); }
 
-        .setting-control input[type="range"] {
-            -webkit-appearance: none;
-            width: 150px;
-            background: rgba(255, 255, 255, 0.1);
-            height: 6px;
-            border-radius: 5px;
-            outline: none;
-        }
+        .range-wrapper { display: flex; align-items: center; gap: 15px; width: 100%; }
+        .range-value { font-size: 1.1rem; color: var(--neon-magenta); font-weight: 700; width: 45px; text-align: right; }
+        .setting-control input[type="range"] { -webkit-appearance: none; width: 100%; height: 4px; background: rgba(255, 255, 255, 0.2); outline: none; position: relative; cursor: pointer; border-radius: 2px; }
+        .setting-control input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; background: var(--neon-magenta); transform: rotate(45deg); cursor: pointer; box-shadow: 0 0 15px var(--neon-magenta); transition: transform 0.1s; }
+        .setting-control input[type="range"]::-webkit-slider-thumb:hover { transform: rotate(45deg) scale(1.3); }
 
-        .setting-control input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 16px;
-            height: 16px;
-            background: var(--neon-cyan);
-            border-radius: 50%;
-            cursor: pointer;
-            box-shadow: 0 0 8px var(--neon-cyan);
-        }
-
-        /* Geri Dön Butonu */
         .back-btn {
-            position: absolute;
-            bottom: 2rem;
-            left: 2rem;
-            background: none;
-            border: 1px solid var(--neon-magenta);
-            color: var(--neon-magenta);
-            font-family: inherit;
-            font-size: 1rem;
-            font-weight: bold;
-            padding: 0.6rem 1.2rem;
-            cursor: pointer;
-            border-radius: 4px;
+            position: absolute; bottom: 2rem; left: 2rem; right: 2rem;
+            background: transparent; border: 1px solid var(--neon-magenta); color: var(--neon-magenta);
+            font-family: inherit; font-size: 1.2rem; font-weight: 700; padding: 1rem; cursor: pointer;
+            letter-spacing: 3px; transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 10px;
+            clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+        }
+        .back-btn:hover { background: var(--neon-magenta); color: #fff; box-shadow: 0 0 20px rgba(255, 0, 85, 0.5); }
+
+        .patch-notes-panel {
+            position: fixed; top: 80px; right: -400px; width: 350px; height: calc(100vh - 160px);
+            background: rgba(10, 10, 15, 0.85); backdrop-filter: blur(10px);
+            border-left: 2px solid var(--neon-cyan); box-shadow: -10px 0 30px rgba(0,0,0,0.8);
+            z-index: 6; transition: right 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            padding: 2rem; color: #fff; overflow-y: auto;
+        }
+        .patch-notes-panel.open { right: 0; }
+        .patch-title { font-size: 1.5rem; color: var(--neon-cyan); border-bottom: 1px solid rgba(0,240,255,0.3); padding-bottom: 10px; margin-bottom: 20px; }
+        .patch-item { margin-bottom: 15px; font-size: 0.95rem; border-left: 2px solid var(--neon-magenta); padding-left: 10px; }
+        .patch-date { color: var(--neon-magenta); font-size: 0.8rem; font-family: 'Roboto Mono', monospace; }
+        .patch-toggle-btn {
+            position: absolute; top: 50%; left: -40px; width: 40px; height: 100px;
+            background: var(--neon-cyan); color: #000; border: none; cursor: pointer;
+            clip-path: polygon(10px 0, 100% 0, 100% 100%, 10px 100%, 0 calc(100% - 10px), 0 10px);
+            display: flex; align-items: center; justify-content: center; font-size: 1.5rem; transition: all 0.3s;
+        }
+        .patch-toggle-btn:hover { background: #fff; box-shadow: 0 0 20px var(--neon-cyan); }
+
+        /* Özel Alert/Modal */
+        .custom-modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); backdrop-filter: blur(5px);
+            display: flex; justify-content: center; align-items: center; z-index: 20000;
+            opacity: 0; visibility: hidden; transition: all 0.3s;
+        }
+        .custom-modal-overlay.active { opacity: 1; visibility: visible; }
+        .custom-modal {
+            background: #050508; border: 2px solid var(--neon-cyan);
+            padding: 3rem; text-align: center; max-width: 500px;
+            box-shadow: 0 0 40px rgba(0, 240, 255, 0.4);
+            clip-path: polygon(20px 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%, 0 20px);
+            transform: scale(0.8); transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .custom-modal-overlay.active .custom-modal { transform: scale(1); }
+        .modal-icon { font-size: 4rem; color: var(--neon-cyan); margin-bottom: 1rem; animation: pulse 2s infinite; }
+        .modal-title { font-size: 2rem; text-transform: uppercase; letter-spacing: 3px; margin-bottom: 1rem; }
+        .modal-text { font-size: 1.1rem; color: #aaa; margin-bottom: 2rem; }
+        .modal-btn {
+            background: var(--neon-cyan); color: #000; border: none; padding: 10px 30px;
+            font-size: 1.2rem; font-weight: 700; font-family: inherit; cursor: pointer; text-transform: uppercase;
+            clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
             transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            letter-spacing: 1px;
         }
+        .modal-btn:hover { background: #fff; box-shadow: 0 0 20px var(--neon-cyan); }
+        .modal-btn.error { background: var(--neon-magenta); }
+        .modal-btn.error:hover { background: #fff; box-shadow: 0 0 20px var(--neon-magenta); }
 
-        .back-btn:hover {
-            background: var(--neon-magenta);
-            color: #000;
-            box-shadow: 0 0 15px var(--neon-magenta);
-        }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
 
-        /* --- GLITCH ANİMASYONU --- */
         @keyframes glitch {
-            0%, 100% { transform: none; transform: skew(0deg); }
-            45% { transform: none; transform: skew(0deg); }
-            46% { transform: skew(-5deg); text-shadow: 3px 0 var(--neon-magenta), -3px 0 var(--neon-cyan); }
-            47% { transform: skew(5deg); }
-            48% { transform: none; }
-            49% { transform: skew(3deg); }
-            50% { transform: none; }
+            0% { clip-path: inset(40% 0 61% 0); transform: translate(-2px, 2px); }
+            20% { clip-path: inset(92% 0 1% 0); transform: translate(1px, -2px); }
+            40% { clip-path: inset(43% 0 1% 0); transform: translate(2px, 2px); }
+            60% { clip-path: inset(25% 0 58% 0); transform: translate(-2px, -2px); }
+            80% { clip-path: inset(54% 0 7% 0); transform: translate(2px, -1px); }
+            100% { clip-path: inset(58% 0 43% 0); transform: translate(0); }
         }
+
+        #flash-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #fff; z-index: 10000; opacity: 0; pointer-events: none; transition: opacity 0.5s ease; }
+        #flash-overlay.active { opacity: 1; }
+
     </style>
 </head>
 <body>
 
-    <div class="grid-bg"></div>
+    <div class="scanlines"></div>
+    <div class="cyber-grid-wrapper">
+        <div class="cyber-grid"></div>
+        <div class="vignette"></div>
+    </div>
+    <div id="flash-overlay"></div>
+
+    <div class="hud-element hud-top-left" id="serverStatus">
+        <i class="fa-solid fa-network-wired"></i> <span data-i18n="hud_ping">PING:</span> <span id="pingValue">24</span>ms | <span data-i18n="hud_server">SUNUCU:</span> EU-WEST-01
+    </div>
+    <div class="hud-element hud-top-right">
+        <i class="fa-solid fa-user-astronaut"></i> <span data-i18n="hud_user">KULLANICI:</span> GUEST_992 | <span data-i18n="hud_level">Svy:</span> 42 | <span style="color:var(--neon-yellow);"><i class="fa-solid fa-coins"></i> 15,400</span>
+    </div>
+    <div class="hud-element hud-bottom-right" id="cyberClock">00:00:00.00</div>
+    
+    <div class="terminal-container">
+        <div class="terminal-log" id="terminalLog"></div>
+    </div>
+
+    <div class="patch-notes-panel" id="patchPanel">
+        <button class="patch-toggle-btn interactive-btn" id="patchBtn" onclick="togglePatchNotes()">
+            <i class="fa-solid fa-chevron-left" id="patchIcon"></i>
+        </button>
+        <h3 class="patch-title"><i class="fa-solid fa-file-code"></i> <span data-i18n="patch_title">GÜNCELLEME NOTLARI</span></h3>
+        <div class="patch-item">
+            <div class="patch-date">v0.9.8.1 - 2026.06.16</div>
+            <p data-i18n="patch_1">- Tam i18n dil desteği eklendi (TR, EN, JP).</p>
+            <p data-i18n="patch_2">- Yeni arayüz ses motoru ve ambiyans eklendi.</p>
+        </div>
+        <div class="patch-item">
+            <div class="patch-date">v0.9.8.0 - 2026.05.22</div>
+            <p data-i18n="patch_3">- Ağ performans iyileştirmeleri ve ping optimizasyonu.</p>
+            <p data-i18n="patch_4">- Oynanış ayarları paneli genişletildi.</p>
+        </div>
+        <div class="patch-item">
+            <div class="patch-date">v0.9.7.5 - 2026.04.10</div>
+            <p data-i18n="patch_5">- Çekirdek motor stabilite güncellemesi.</p>
+        </div>
+    </div>
 
     <div class="loading-screen" id="loadingScreen">
-        <div class="studio-logo">BILAL STUDIOS</div>
+        <div class="studio-logo" data-text="BILAL STUDIOS">BILAL STUDIOS</div>
         <div class="loader-container" id="loaderContainer">
             <div class="progress-bar" id="progressBar"></div>
         </div>
-        <div class="loading-text" id="loadingText">Sistemler Yükleniyor...</div>
+        <div class="loading-info">
+            <div class="loading-text" id="loadingText" data-i18n="loading_init">SYS.BOOT_SEQ.INIT</div>
+            <div id="loadingPercent">0%</div>
+        </div>
     </div>
 
     <div class="main-menu-content" id="mainMenu">
         <div class="game-header">
             <h1 class="game-title">PROJECT: NEO</h1>
-            <div class="game-subtitle">// EARLY ACCESS 2026</div>
+            <div class="game-subtitle"><span data-i18n="game_version">V 0.9.8.1 // ERKEN ERİŞİM 2026</span></div>
         </div>
 
-        <div class="menu-container">
-            <div class="menu-item"><i class="fa-solid fa-play"></i> OYUNA BAŞLA</div>
-            <div class="menu-item"><i class="fa-solid fa-floppy-disk"></i> KAYDI YÜKLE</div>
-            <div class="menu-item" id="openSettingsBtn"><i class="fa-solid fa-gear"></i> AYARLAR</div>
-            <div class="menu-item" style="color: rgba(255,0,85,0.6);"><i class="fa-solid fa-power-off"></i> ÇIKIŞ</div>
+        <div class="menu-grid">
+            <div class="menu-column">
+                <div class="menu-item interactive-btn" id="startBtn"><i class="fa-solid fa-play"></i> <span data-i18n="menu_start">SİSTEME GİRİŞ YAP</span></div>
+                <div class="menu-item interactive-btn"><i class="fa-solid fa-server"></i> <span data-i18n="menu_load">VERİLERİ YÜKLE</span></div>
+                <div class="menu-item interactive-btn"><i class="fa-solid fa-box-open"></i> <span data-i18n="menu_inventory">ENVANTER</span></div>
+                <div class="menu-item interactive-btn"><i class="fa-solid fa-trophy"></i> <span data-i18n="menu_achievements">BAŞARIMLAR</span></div>
+            </div>
+            <div class="menu-column">
+                <div class="menu-item gold interactive-btn" id="dailyRewardBtn"><i class="fa-solid fa-gift"></i> <span data-i18n="menu_reward">GÜNLÜK ÖDÜLÜ AL</span></div>
+                <div class="menu-item interactive-btn" id="openSettingsBtn"><i class="fa-solid fa-gear"></i> <span data-i18n="menu_settings">YAPILANDIRMA (AYARLAR)</span></div>
+                <div class="menu-item interactive-btn"><i class="fa-solid fa-users"></i> <span data-i18n="menu_credits">GELİŞTİRİCİLER</span></div>
+                <div class="menu-item danger interactive-btn" id="disconnectBtn"><i class="fa-solid fa-power-off"></i> <span data-i18n="menu_exit">BAĞLANTIYI KES</span></div>
+            </div>
         </div>
     </div>
 
     <div class="settings-panel" id="settingsPanel">
-        
         <div class="settings-tabs">
-            <h3>// CONTROL_PANEL</h3>
-            <button class="tab-btn active" onclick="switchTab(event, 'graphics')"><i class="fa-solid fa-desktop"></i> GRAFİKLER</button>
-            <button class="tab-btn" onclick="switchTab(event, 'audio')"><i class="fa-solid fa-volume-high"></i> SESLER</button>
-            <button class="tab-btn" onclick="switchTab(event, 'controls')"><i class="fa-solid fa-gamepad"></i> KONTROLLER</button>
-            <button class="tab-btn" onclick="switchTab(event, 'general')"><i class="fa-solid fa-sliders"></i> GENEL</button>
+            <h3><i class="fa-solid fa-terminal"></i> <span data-i18n="settings_root">ROOT_ACCESS</span></h3>
+            <button class="tab-btn active interactive-btn" onclick="switchTab(event, 'graphics')"><i class="fa-solid fa-desktop"></i> <span data-i18n="tab_graphics">Görüntü</span></button>
+            <button class="tab-btn interactive-btn" onclick="switchTab(event, 'audio')"><i class="fa-solid fa-wave-square"></i> <span data-i18n="tab_audio">Ses</span></button>
+            <button class="tab-btn interactive-btn" onclick="switchTab(event, 'gameplay')"><i class="fa-solid fa-crosshairs"></i> <span data-i18n="tab_gameplay">Oynanış</span></button>
+            <button class="tab-btn interactive-btn" onclick="switchTab(event, 'controls')"><i class="fa-solid fa-gamepad"></i> <span data-i18n="tab_controls">Arayüz</span></button>
+            <button class="tab-btn interactive-btn" onclick="switchTab(event, 'general')"><i class="fa-solid fa-globe"></i> <span data-i18n="tab_network">Ağ & Sistem</span></button>
             
-            <button class="back-btn" id="closeSettingsBtn"><i class="fa-solid fa-arrow-left"></i> GERİ DÖN</button>
+            <button class="back-btn interactive-btn" id="closeSettingsBtn"><i class="fa-solid fa-xmark"></i> <span data-i18n="btn_close_terminal">TERMİNALİ KAPAT</span></button>
         </div>
 
         <div class="settings-content">
-            
+            <!-- GRAFİKLER -->
             <div id="graphics" class="tab-content active">
+                <h2 class="tab-header" data-i18n="hdr_graphics">Görüntü Yapılandırması</h2>
                 <div class="setting-row">
                     <div class="setting-label">
-                        <span class="setting-title">Çözünürlük</span>
-                        <span class="setting-desc">Ekran boyut kalitesini belirler.</span>
+                        <span class="setting-title" data-i18n="stg_res_title">Optik Çözünürlük</span>
+                        <span class="setting-desc" data-i18n="stg_res_desc">Görsel çıktı matrisini belirler. Yüksek değerler GPU yükünü artırır.</span>
                     </div>
                     <div class="setting-control">
-                        <select>
-                            <option>1920x1080 (16:9)</option>
-                            <option>2560x1440 (2K)</option>
-                            <option>3840x2160 (4K)</option>
+                        <select class="interactive-btn">
+                            <option>1920x1080 [FHD]</option><option>2560x1440 [QHD]</option><option selected>3840x2160 [4K UHD]</option>
                         </select>
                     </div>
                 </div>
                 <div class="setting-row">
                     <div class="setting-label">
-                        <span class="setting-title">Ray Tracing</span>
-                        <span class="setting-desc">Işık ve yansıma kalitesini fütüristik yapar.</span>
+                        <span class="setting-title" data-i18n="stg_rt_title">Foton Yansıtma (Ray Tracing)</span>
+                        <span class="setting-desc" data-i18n="stg_rt_desc">Gerçek zamanlı dinamik ışıklandırma algoritması.</span>
                     </div>
                     <div class="setting-control">
-                        <select><option>KAPALI</option><option selected>AÇIK (ULTRA)</option></select>
+                        <select class="interactive-btn"><option data-i18n="opt_off">DEVRE DIŞI</option><option selected data-i18n="opt_ultra">AŞIRI YÜKLENME (ULTRA)</option></select>
                     </div>
                 </div>
                 <div class="setting-row">
                     <div class="setting-label">
-                        <span class="setting-title">Kare Hızı Sınırı (FPS)</span>
-                        <span class="setting-desc">Maksimum akıcılık limitini seçin.</span>
+                        <span class="setting-title" data-i18n="stg_vsync_title">Dikey Senkronizasyon (V-Sync)</span>
+                        <span class="setting-desc" data-i18n="stg_vsync_desc">Kırılmaları önler ancak giriş gecikmesini (input lag) artırabilir.</span>
                     </div>
                     <div class="setting-control">
-                        <select><option>60 FPS</option><option>144 FPS</option><option selected>SINIRSIZ</option></select>
+                        <label class="switch"><input type="checkbox" checked class="interactive-btn"><span class="slider"></span></label>
+                    </div>
+                </div>
+                <div class="setting-row">
+                    <div class="setting-label">
+                        <span class="setting-title" data-i18n="stg_fps_title">Kare Hızı (FPS) Sınırı</span>
+                        <span class="setting-desc" data-i18n="stg_fps_desc">Saniyedeki maksimum veri işleme hızı.</span>
+                    </div>
+                    <div class="setting-control">
+                        <select class="interactive-btn"><option>60 HZ</option><option>144 HZ</option><option selected data-i18n="opt_unlimited">LİMİTSİZ</option></select>
                     </div>
                 </div>
             </div>
 
+            <!-- SESLER -->
             <div id="audio" class="tab-content">
+                <h2 class="tab-header" data-i18n="hdr_audio">Ses Dalga Boyu Yapılandırması</h2>
                 <div class="setting-row">
                     <div class="setting-label">
-                        <span class="setting-title">Ana Ses Seviyesi</span>
-                        <span class="setting-desc">Oyunun genel ses perdesi.</span>
+                        <span class="setting-title" data-i18n="stg_master_title">Ana Frekans (Master)</span>
+                        <span class="setting-desc" data-i18n="stg_master_desc">Sistemin genel ses şiddeti.</span>
                     </div>
-                    <div class="setting-control">
-                        <input type="range" min="0" max="100" value="80">
+                    <div class="setting-control range-wrapper">
+                        <input type="range" min="0" max="100" value="80" class="interactive-btn" oninput="updateRangeVal(this)">
+                        <span class="range-value">80</span>
                     </div>
                 </div>
                 <div class="setting-row">
                     <div class="setting-label">
-                        <span class="setting-title">Müzik Ses Seviyesi</span>
-                        <span class="setting-desc">Arka plandaki Synthwave müzik şiddeti.</span>
+                        <span class="setting-title" data-i18n="stg_music_title">Ortam Sinyali (Ambiyans/Müzik)</span>
+                        <span class="setting-desc" data-i18n="stg_music_desc">Arka plan synth dalgaları şiddeti.</span>
+                    </div>
+                    <div class="setting-control range-wrapper">
+                        <input type="range" min="0" max="100" value="65" class="interactive-btn" id="ambientVolSlider" oninput="updateRangeVal(this); updateAmbientVolume(this.value);">
+                        <span class="range-value">65</span>
+                    </div>
+                </div>
+                <div class="setting-row">
+                    <div class="setting-label">
+                        <span class="setting-title" data-i18n="stg_sfx_title">Arayüz Geri Bildirimi (SFX)</span>
+                        <span class="setting-desc" data-i18n="stg_sfx_desc">Tıklama ve menü geçiş sesleri.</span>
                     </div>
                     <div class="setting-control">
-                        <input type="range" min="0" max="100" value="60">
+                        <label class="switch"><input type="checkbox" checked id="sfxToggle" class="interactive-btn"><span class="slider"></span></label>
                     </div>
                 </div>
             </div>
 
+            <!-- OYNANIŞ (YENİ) -->
+            <div id="gameplay" class="tab-content">
+                <h2 class="tab-header" data-i18n="hdr_gameplay">Simülasyon Kuralları (Oynanış)</h2>
+                <div class="setting-row">
+                    <div class="setting-label">
+                        <span class="setting-title" data-i18n="stg_diff_title">Tehdit Seviyesi (Zorluk)</span>
+                        <span class="setting-desc" data-i18n="stg_diff_desc">Yapay zeka düşmanların reaksiyon süresi ve hasarı.</span>
+                    </div>
+                    <div class="setting-control">
+                        <select class="interactive-btn">
+                            <option data-i18n="opt_diff_1">HİKAYE (KOLAY)</option>
+                            <option selected data-i18n="opt_diff_2">STANDART (NORMAL)</option>
+                            <option data-i18n="opt_diff_3">SİBER PSİKO (ZOR)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="setting-row">
+                    <div class="setting-label">
+                        <span class="setting-title" data-i18n="stg_shake_title">Kamera Sarsıntısı</span>
+                        <span class="setting-desc" data-i18n="stg_shake_desc">Patlama ve hasar anındaki optik bozulmalar.</span>
+                    </div>
+                    <div class="setting-control">
+                        <label class="switch"><input type="checkbox" checked class="interactive-btn"><span class="slider"></span></label>
+                    </div>
+                </div>
+                <div class="setting-row">
+                    <div class="setting-label">
+                        <span class="setting-title" data-i18n="stg_gore_title">Sansür (Kan Efektleri)</span>
+                        <span class="setting-desc" data-i18n="stg_gore_desc">Ağır hasar animasyonlarını gizler.</span>
+                    </div>
+                    <div class="setting-control">
+                        <label class="switch"><input type="checkbox" class="interactive-btn"><span class="slider"></span></label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- KONTROLLER -->
             <div id="controls" class="tab-content">
+                <h2 class="tab-header" data-i18n="hdr_controls">Kullanıcı Arayüzü Cihazları</h2>
                 <div class="setting-row">
                     <div class="setting-label">
-                        <span class="setting-title">Mouse Hassasiyeti</span>
-                        <span class="setting-desc">Dönüş hızınızı ayarlar.</span>
+                        <span class="setting-title" data-i18n="stg_sens_title">Sensör Hassasiyeti</span>
+                        <span class="setting-desc" data-i18n="stg_sens_desc">Optik farenin dönüş tepki süresi.</span>
                     </div>
-                    <div class="setting-control">
-                        <input type="range" min="1" max="10" value="5" step="0.1">
+                    <div class="setting-control range-wrapper">
+                        <input type="range" min="1" max="10" value="5" step="0.1" class="interactive-btn" oninput="updateRangeVal(this)">
+                        <span class="range-value">5.0</span>
                     </div>
                 </div>
                 <div class="setting-row">
                     <div class="setting-label">
-                        <span class="setting-title">Giriş Cihazı</span>
-                        <span class="setting-desc">Varsayılan kontrolcü şeması.</span>
+                        <span class="setting-title" data-i18n="stg_input_title">Giriş Modülü</span>
+                        <span class="setting-desc" data-i18n="stg_input_desc">Varsayılan kontrol donanımı.</span>
                     </div>
                     <div class="setting-control">
-                        <select><option>Klavye & Mouse</option><option>Xbox Controller</option><option>DualSense (PS5)</option></select>
+                        <select class="interactive-btn">
+                            <option selected data-i18n="opt_in_1">Klavye & Optik Fare</option>
+                            <option data-i18n="opt_in_2">Nöral Bağlantı</option>
+                            <option>Gamepad</option>
+                        </select>
                     </div>
                 </div>
             </div>
 
+            <!-- GENEL & AĞ -->
             <div id="general" class="tab-content">
+                <h2 class="tab-header" data-i18n="hdr_network">Ağ & Sistem Modülleri</h2>
                 <div class="setting-row">
                     <div class="setting-label">
-                        <span class="setting-title">Dil (Language)</span>
-                        <span class="setting-desc">Arayüz ve alt yazı dili.</span>
+                        <span class="setting-title" data-i18n="stg_lang_title">İletişim Dili (Language)</span>
+                        <span class="setting-desc" data-i18n="stg_lang_desc">Veritabanından çekilecek dil paketi. (Anında Değişir)</span>
                     </div>
                     <div class="setting-control">
-                        <select><option selected>Türkçe</option><option>English</option><option>Deutsch</option></select>
+                        <select class="interactive-btn" id="langSelect" onchange="changeLanguage(this.value)">
+                            <option value="tr" selected>TR_TURKISH (Türkçe)</option>
+                            <option value="en">EN_GLOBAL (English)</option>
+                            <option value="jp">JP_CYBER (日本語)</option>
+                        </select>
                     </div>
                 </div>
                 <div class="setting-row">
                     <div class="setting-label">
-                        <span class="setting-title">Crossplay</span>
-                        <span class="setting-desc">Diğer platformdaki oyuncularla eşleşme.</span>
+                        <span class="setting-title" data-i18n="stg_cross_title">Ağlar Arası Senkron (Crossplay)</span>
+                        <span class="setting-desc" data-i18n="stg_cross_desc">Diğer sunucu nodelarındaki operatörlerle eşleşme.</span>
                     </div>
                     <div class="setting-control">
-                        <select><option selected>AKTİF</option><option>PASİF</option></select>
+                        <select class="interactive-btn"><option selected data-i18n="opt_active">AKTİF</option><option data-i18n="opt_passive">KORUMALI MOD (PASİF)</option></select>
                     </div>
                 </div>
             </div>
@@ -538,10 +588,298 @@
         </div>
     </div>
 
+    <div class="custom-modal-overlay" id="customModalOverlay">
+        <div class="custom-modal">
+            <i class="fa-solid fa-circle-check modal-icon" id="modalIcon"></i>
+            <h2 class="modal-title" id="modalTitle">BAŞARILI</h2>
+            <p class="modal-text" id="modalText">İşlem başarıyla gerçekleştirildi.</p>
+            <button class="modal-btn interactive-btn" id="modalBtn" onclick="closeModal()">ONAYLA</button>
+        </div>
+    </div>
+
     <script>
+        // --- 0. DİL SİSTEMİ (i18n) ---
+        const i18n = {
+            tr: {
+                hud_ping: "PING:", hud_server: "SUNUCU:", hud_user: "KULLANICI:", hud_level: "Svy:",
+                patch_title: "GÜNCELLEME NOTLARI",
+                patch_1: "- Tam i18n dil desteği eklendi (TR, EN, JP).", patch_2: "- Yeni arayüz ses motoru ve ambiyans eklendi.",
+                patch_3: "- Ağ performans iyileştirmeleri ve ping optimizasyonu.", patch_4: "- Oynanış ayarları paneli genişletildi.", patch_5: "- Çekirdek motor stabilite güncellemesi.",
+                loading_init: "SYS.BOOT_SEQ.INIT",
+                game_version: "V 0.9.8.1 // ERKEN ERİŞİM 2026",
+                menu_start: "SİSTEME GİRİŞ YAP", menu_load: "VERİLERİ YÜKLE", menu_inventory: "ENVANTER", menu_achievements: "BAŞARIMLAR",
+                menu_reward: "GÜNLÜK ÖDÜLÜ AL", menu_settings: "YAPILANDIRMA (AYARLAR)", menu_credits: "GELİŞTİRİCİLER", menu_exit: "BAĞLANTIYI KES",
+                settings_root: "ROOT_ACCESS", tab_graphics: "Görüntü", tab_audio: "Ses", tab_gameplay: "Oynanış", tab_controls: "Arayüz", tab_network: "Ağ & Sistem", btn_close_terminal: "TERMİNALİ KAPAT",
+                hdr_graphics: "Görüntü Yapılandırması",
+                stg_res_title: "Optik Çözünürlük", stg_res_desc: "Görsel çıktı matrisini belirler. Yüksek değerler GPU yükünü artırır.",
+                stg_rt_title: "Foton Yansıtma (Ray Tracing)", stg_rt_desc: "Gerçek zamanlı dinamik ışıklandırma algoritması.", opt_off: "DEVRE DIŞI", opt_ultra: "AŞIRI YÜKLENME (ULTRA)",
+                stg_vsync_title: "Dikey Senkronizasyon (V-Sync)", stg_vsync_desc: "Kırılmaları önler ancak giriş gecikmesini artırabilir.",
+                stg_fps_title: "Kare Hızı (FPS) Sınırı", stg_fps_desc: "Saniyedeki maksimum veri işleme hızı.", opt_unlimited: "LİMİTSİZ",
+                hdr_audio: "Ses Dalga Boyu Yapılandırması",
+                stg_master_title: "Ana Frekans (Master)", stg_master_desc: "Sistemin genel ses şiddeti.",
+                stg_music_title: "Ortam Sinyali (Ambiyans/Müzik)", stg_music_desc: "Arka plan synth dalgaları şiddeti.",
+                stg_sfx_title: "Arayüz Geri Bildirimi (SFX)", stg_sfx_desc: "Tıklama ve menü geçiş sesleri.",
+                hdr_gameplay: "Simülasyon Kuralları (Oynanış)",
+                stg_diff_title: "Tehdit Seviyesi (Zorluk)", stg_diff_desc: "Yapay zeka düşmanların reaksiyon süresi ve hasarı.", opt_diff_1: "HİKAYE (KOLAY)", opt_diff_2: "STANDART (NORMAL)", opt_diff_3: "SİBER PSİKO (ZOR)",
+                stg_shake_title: "Kamera Sarsıntısı", stg_shake_desc: "Patlama ve hasar anındaki optik bozulmalar.",
+                stg_gore_title: "Sansür (Kan Efektleri)", stg_gore_desc: "Ağır hasar animasyonlarını gizler.",
+                hdr_controls: "Kullanıcı Arayüzü Cihazları",
+                stg_sens_title: "Sensör Hassasiyeti", stg_sens_desc: "Optik farenin dönüş tepki süresi.",
+                stg_input_title: "Giriş Modülü", stg_input_desc: "Varsayılan kontrol donanımı.", opt_in_1: "Klavye & Optik Fare", opt_in_2: "Nöral Bağlantı",
+                hdr_network: "Ağ & Sistem Modülleri",
+                stg_lang_title: "İletişim Dili (Language)", stg_lang_desc: "Veritabanından çekilecek dil paketi. (Anında Değişir)",
+                stg_cross_title: "Ağlar Arası Senkron (Crossplay)", stg_cross_desc: "Diğer sunucu nodelarındaki operatörlerle eşleşme.", opt_active: "AKTİF", opt_passive: "KORUMALI MOD (PASİF)",
+                modal_start_title: "SİSTEM BAĞLANTISI", modal_start_desc: "Sunucuya başarıyla bağlanıldı. Yükleme sahnesine geçiliyor.", modal_start_btn: "DEVAM ET",
+                modal_reward_title: "GÜNLÜK ÖDÜL", modal_reward_desc: "1500 Kredi hesabınıza tanımlandı.", modal_reward_btn: "TOPLA",
+                modal_disc_title: "UYARI: BAĞLANTI KESİLİYOR", modal_disc_desc: "Ağ bağlantısını koparmak üzeresiniz. Devam edilsin mi?", modal_disc_btn: "İPTAL"
+            },
+            en: {
+                hud_ping: "PING:", hud_server: "SERVER:", hud_user: "USER:", hud_level: "Lvl:",
+                patch_title: "PATCH NOTES",
+                patch_1: "- Full i18n language support added (TR, EN, JP).", patch_2: "- New UI sound engine & ambient drone added.",
+                patch_3: "- Network performance and ping optimization.", patch_4: "- Gameplay settings panel expanded.", patch_5: "- Core engine stability update.",
+                loading_init: "SYS.BOOT_SEQ.INIT",
+                game_version: "V 0.9.8.1 // EARLY ACCESS 2026",
+                menu_start: "INITIALIZE SYSTEM", menu_load: "LOAD DATA", menu_inventory: "INVENTORY", menu_achievements: "ACHIEVEMENTS",
+                menu_reward: "CLAIM DAILY REWARD", menu_settings: "CONFIGURATION (SETTINGS)", menu_credits: "DEVELOPERS", menu_exit: "DISCONNECT",
+                settings_root: "ROOT_ACCESS", tab_graphics: "Display", tab_audio: "Audio", tab_gameplay: "Gameplay", tab_controls: "Interface", tab_network: "Network & Sys", btn_close_terminal: "CLOSE TERMINAL",
+                hdr_graphics: "Display Configuration",
+                stg_res_title: "Optical Resolution", stg_res_desc: "Determines visual output matrix. Higher values increase GPU load.",
+                stg_rt_title: "Photon Reflection (Ray Tracing)", stg_rt_desc: "Real-time dynamic lighting algorithm.", opt_off: "DISABLED", opt_ultra: "OVERLOAD (ULTRA)",
+                stg_vsync_title: "Vertical Sync (V-Sync)", stg_vsync_desc: "Prevents screen tearing but may increase input lag.",
+                stg_fps_title: "Frame Rate (FPS) Limit", stg_fps_desc: "Maximum data processing rate per second.", opt_unlimited: "UNLIMITED",
+                hdr_audio: "Audio Wavelength Configuration",
+                stg_master_title: "Master Frequency", stg_master_desc: "Overall system volume.",
+                stg_music_title: "Ambient Signal (Music)", stg_music_desc: "Background synth wave intensity.",
+                stg_sfx_title: "UI Feedback (SFX)", stg_sfx_desc: "Click and menu transition sounds.",
+                hdr_gameplay: "Simulation Rules (Gameplay)",
+                stg_diff_title: "Threat Level (Difficulty)", stg_diff_desc: "AI enemy reaction time and damage output.", opt_diff_1: "STORY (EASY)", opt_diff_2: "STANDARD (NORMAL)", opt_diff_3: "CYBER PSYCHO (HARD)",
+                stg_shake_title: "Camera Shake", stg_shake_desc: "Optical distortions during explosions and damage.",
+                stg_gore_title: "Censorship (Gore)", stg_gore_desc: "Hides heavy damage animations.",
+                hdr_controls: "User Interface Devices",
+                stg_sens_title: "Sensor Sensitivity", stg_sens_desc: "Optical mouse rotation response time.",
+                stg_input_title: "Input Module", stg_input_desc: "Default control hardware.", opt_in_1: "Keyboard & Optical Mouse", opt_in_2: "Neural Link",
+                hdr_network: "Network & System Modules",
+                stg_lang_title: "Communication Language", stg_lang_desc: "Language pack fetched from database. (Instant Change)",
+                stg_cross_title: "Cross-Network Sync (Crossplay)", stg_cross_desc: "Matchmaking with operators on other server nodes.", opt_active: "ACTIVE", opt_passive: "PROTECTED MODE (PASSIVE)",
+                modal_start_title: "SYSTEM CONNECTION", modal_start_desc: "Successfully connected to server. Proceeding to load scene.", modal_start_btn: "PROCEED",
+                modal_reward_title: "DAILY REWARD", modal_reward_desc: "1500 Credits added to your account.", modal_reward_btn: "CLAIM",
+                modal_disc_title: "WARNING: DISCONNECTING", modal_disc_desc: "You are about to sever the network connection. Proceed?", modal_disc_btn: "CANCEL"
+            },
+            jp: {
+                hud_ping: "遅延:", hud_server: "サーバー:", hud_user: "ユーザー:", hud_level: "Lv:",
+                patch_title: "パッチノート",
+                patch_1: "- 完全な多言語サポート追加 (TR, EN, JP)", patch_2: "- 新しいUIサウンドエンジンと環境音を追加",
+                patch_3: "- ネットワークパフォーマンスと遅延の最適化", patch_4: "- ゲームプレイ設定パネルを拡張", patch_5: "- コアエンジンの安定性アップデート",
+                loading_init: "システム起動...",
+                game_version: "V 0.9.8.1 // アーリーアクセス 2026",
+                menu_start: "システムにログイン", menu_load: "データをロード", menu_inventory: "インベントリ", menu_achievements: "実績",
+                menu_reward: "デイリー報酬を獲得", menu_settings: "システム設定", menu_credits: "開発者", menu_exit: "切断する",
+                settings_root: "ルートアクセス", tab_graphics: "グラフィック", tab_audio: "オーディオ", tab_gameplay: "ゲームプレイ", tab_controls: "操作", tab_network: "ネットワーク", btn_close_terminal: "ターミナルを閉じる",
+                hdr_graphics: "ディスプレイ設定",
+                stg_res_title: "光学解像度", stg_res_desc: "視覚出力マトリックスを決定します。GPU負荷が増加します。",
+                stg_rt_title: "レイトレーシング", stg_rt_desc: "リアルタイムの動的照明アルゴリズム。", opt_off: "無効", opt_ultra: "過負荷 (ウルトラ)",
+                stg_vsync_title: "垂直同期 (V-Sync)", stg_vsync_desc: "ティアリングを防ぎますが、入力遅延が増加する可能性があります。",
+                stg_fps_title: "FPS制限", stg_fps_desc: "1秒あたりの最大データ処理速度。", opt_unlimited: "無制限",
+                hdr_audio: "オーディオ波長設定",
+                stg_master_title: "マスター音量", stg_master_desc: "システム全体の音量。",
+                stg_music_title: "環境信号 (BGM)", stg_music_desc: "バックグラウンドのシンセウェーブ強度。",
+                stg_sfx_title: "UIフィードバック (SFX)", stg_sfx_desc: "クリックとメニュー移行の音。",
+                hdr_gameplay: "シミュレーションルール",
+                stg_diff_title: "脅威レベル (難易度)", stg_diff_desc: "AIの反応時間とダメージ出力。", opt_diff_1: "ストーリー (簡単)", opt_diff_2: "標準 (ノーマル)", opt_diff_3: "サイバーサイコ (困難)",
+                stg_shake_title: "カメラの揺れ", stg_shake_desc: "爆発やダメージ時の光学的歪み。",
+                stg_gore_title: "ゴア表現", stg_gore_desc: "激しいダメージアニメーションを隠します。",
+                hdr_controls: "ユーザーインターフェースデバイス",
+                stg_sens_title: "センサー感度", stg_sens_desc: "光学マウスの回転応答時間。",
+                stg_input_title: "入力モジュール", stg_input_desc: "デフォルトの制御ハードウェア。", opt_in_1: "キーボードとマウス", opt_in_2: "ニューラルリンク",
+                hdr_network: "ネットワークとシステム",
+                stg_lang_title: "通信言語", stg_lang_desc: "データベースから取得した言語パック。(即時変更)",
+                stg_cross_title: "クロスプレイ", stg_cross_desc: "他のサーバーノードのオペレーターとのマッチメイキング。", opt_active: "有効", opt_passive: "保護モード (無効)",
+                modal_start_title: "システム接続", modal_start_desc: "サーバーへの接続に成功しました。ロードシーンに移行します。", modal_start_btn: "続行する",
+                modal_reward_title: "デイリー報酬", modal_reward_desc: "1500クレジットがアカウントに追加されました。", modal_reward_btn: "受け取る",
+                modal_disc_title: "警告: 切断中", modal_disc_desc: "ネットワーク接続を切断しようとしています。続行しますか？", modal_disc_btn: "キャンセル"
+            }
+        };
+
+        let currentLang = 'tr';
+
+        function changeLanguage(lang) {
+            currentLang = lang;
+            const elements = document.querySelectorAll('[data-i18n]');
+            elements.forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (i18n[lang] && i18n[lang][key]) {
+                    el.innerText = i18n[lang][key];
+                }
+            });
+            playTone(900, 'sine', 0.1, 0.1); // Dil değişme sesi
+        }
+
+        // --- 1. GELİŞMİŞ SES MOTORU (Web Audio API) ---
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        let ambientOsc = null;
+        let ambientGain = null;
+        let audioInitialized = false;
+
+        function getSfxStatus() {
+            return document.getElementById('sfxToggle').checked;
+        }
+
+        function playTone(freq, type, duration, vol, isSfx = true) {
+            if(isSfx && !getSfxStatus()) return;
+            if(audioCtx.state === 'suspended') audioCtx.resume();
+            
+            const osc = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            
+            // Hızlı fade out
+            gainNode.gain.setValueAtTime(vol, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+            
+            osc.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + duration);
+        }
+
+        function playHoverSound() { playTone(600, 'sine', 0.05, 0.03); }
+        function playClickSound() { playTone(300, 'square', 0.1, 0.05); playTone(800, 'square', 0.1, 0.08); }
+        function playErrorSound() { playTone(150, 'sawtooth', 0.3, 0.1); playTone(100, 'square', 0.4, 0.1); }
+        function playSuccessSound() { playTone(600, 'sine', 0.1, 0.05); setTimeout(()=>playTone(800, 'sine', 0.2, 0.05), 100); setTimeout(()=>playTone(1200, 'sine', 0.4, 0.05), 200); }
+
+        function initAmbientSound() {
+            if(audioInitialized) return;
+            audioInitialized = true;
+            if(audioCtx.state === 'suspended') audioCtx.resume();
+            
+            ambientOsc = audioCtx.createOscillator();
+            ambientGain = audioCtx.createGain();
+            
+            // Düşük frekanslı uğultu (drone)
+            ambientOsc.type = 'sine';
+            ambientOsc.frequency.setValueAtTime(55, audioCtx.currentTime); // Low A
+            
+            // Titreşim (LFO efekti) için frekansı hafifçe değiştir
+            setInterval(() => {
+                if(!ambientOsc) return;
+                const newFreq = 50 + Math.random() * 10;
+                ambientOsc.frequency.linearRampToValueAtTime(newFreq, audioCtx.currentTime + 2);
+            }, 2000);
+
+            let vol = document.getElementById('ambientVolSlider').value / 100 * 0.2; // Max %20 hacim
+            ambientGain.gain.setValueAtTime(vol, audioCtx.currentTime);
+            
+            ambientOsc.connect(ambientGain);
+            ambientGain.connect(audioCtx.destination);
+            ambientOsc.start();
+        }
+
+        function updateAmbientVolume(val) {
+            if(ambientGain) {
+                ambientGain.gain.linearRampToValueAtTime(val / 100 * 0.2, audioCtx.currentTime + 0.5);
+            }
+        }
+
+        // --- 2. HUD & TERMİNAL ÖZELLİKLERİ ---
+        // Saat Güncelleme
+        setInterval(() => {
+            const now = new Date();
+            const timeString = now.toTimeString().split(' ')[0] + '.' + now.getMilliseconds().toString().padStart(3, '0').slice(0,2);
+            document.getElementById('cyberClock').innerText = timeString;
+        }, 50);
+
+        // Ping Simülasyonu
+        setInterval(() => {
+            const pingEl = document.getElementById('pingValue');
+            let currentPing = parseInt(pingEl.innerText);
+            let change = Math.floor(Math.random() * 5) - 2;
+            let newPing = Math.max(12, Math.min(80, currentPing + change));
+            pingEl.innerText = newPing;
+            pingEl.style.color = newPing > 50 ? var('--neon-magenta') : 'var(--neon-cyan)';
+        }, 2000);
+
+        // Terminal Log Simülasyonu
+        const terminalLog = document.getElementById('terminalLog');
+        const fakeLogs = [
+            "Mem alloc 0x4A9B2...", "Connecting to proxy node 7...", "Bypassing firewall...", 
+            "[OK] Handshake verified.", "[WARN] Package loss detected.", "Decrypting asset stream...",
+            "Loading sector_04 data...", "Synchronizing user cache..."
+        ];
+        
+        setInterval(() => {
+            const line = document.createElement('div');
+            line.className = 'terminal-line';
+            const randomLog = fakeLogs[Math.floor(Math.random() * fakeLogs.length)];
+            const timestamp = new Date().toTimeString().split(' ')[0];
+            line.innerText = `[${timestamp}] ${randomLog}`;
+            
+            if(randomLog.includes("[WARN]")) line.classList.add('error');
+            if(randomLog.includes("[OK]")) line.classList.add('success');
+            
+            terminalLog.appendChild(line);
+            if(terminalLog.children.length > 8) terminalLog.removeChild(terminalLog.firstChild);
+        }, 800);
+
+
+        // --- 3. MODAL SİSTEMİ (Alert Yerine) ---
+        const modalOverlay = document.getElementById('customModalOverlay');
+        const modalIcon = document.getElementById('modalIcon');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalText = document.getElementById('modalText');
+        const modalBtn = document.getElementById('modalBtn');
+
+        function showModal(type, titleKey, textKey, btnKey) {
+            modalTitle.innerText = i18n[currentLang][titleKey];
+            modalText.innerText = i18n[currentLang][textKey];
+            modalBtn.innerText = i18n[currentLang][btnKey];
+            
+            modalIcon.className = 'modal-icon fa-solid';
+            modalBtn.className = 'modal-btn interactive-btn';
+
+            if(type === 'success') {
+                modalIcon.classList.add('fa-circle-check');
+                modalIcon.style.color = 'var(--neon-cyan)';
+                playSuccessSound();
+            } else if (type === 'reward') {
+                modalIcon.classList.add('fa-gift');
+                modalIcon.style.color = 'var(--neon-yellow)';
+                playSuccessSound();
+            } else if (type === 'danger') {
+                modalIcon.classList.add('fa-triangle-exclamation');
+                modalIcon.style.color = 'var(--neon-magenta)';
+                modalBtn.classList.add('error');
+                playErrorSound();
+            }
+
+            modalOverlay.classList.add('active');
+        }
+
+        function closeModal() {
+            playClickSound();
+            modalOverlay.classList.remove('active');
+        }
+
+        // Yama Notları Paneli Toggle
+        function togglePatchNotes() {
+            const panel = document.getElementById('patchPanel');
+            const icon = document.getElementById('patchIcon');
+            panel.classList.toggle('open');
+            playTone(500, 'triangle', 0.1, 0.05);
+            if(panel.classList.contains('open')) {
+                icon.classList.remove('fa-chevron-left');
+                icon.classList.add('fa-chevron-right');
+            } else {
+                icon.classList.remove('fa-chevron-right');
+                icon.classList.add('fa-chevron-left');
+            }
+        }
+
+        // --- 4. YÜKLEME SİSTEMİ VE ETKİLEŞİMLER ---
         window.addEventListener('DOMContentLoaded', () => {
             const progressBar = document.getElementById('progressBar');
-            const loaderContainer = document.getElementById('loaderContainer');
+            const loadingPercent = document.getElementById('loadingPercent');
             const loadingText = document.getElementById('loadingText');
             const loadingScreen = document.getElementById('loadingScreen');
             const mainMenu = document.getElementById('mainMenu');
@@ -549,62 +887,105 @@
             const settingsPanel = document.getElementById('settingsPanel');
             const openSettingsBtn = document.getElementById('openSettingsBtn');
             const closeSettingsBtn = document.getElementById('closeSettingsBtn');
+            const startBtn = document.getElementById('startBtn');
+            const dailyBtn = document.getElementById('dailyRewardBtn');
+            const discBtn = document.getElementById('disconnectBtn');
+            const flashOverlay = document.getElementById('flash-overlay');
 
+            // Ses Motorunu Başlatmak İçin İlk Etkileşimi Bekle
+            document.body.addEventListener('click', initAmbientSound, { once: true });
+
+            // İnteraktif Butonlara Ses Ekle
+            document.querySelectorAll('.interactive-btn').forEach(el => {
+                el.addEventListener('mouseenter', playHoverSound);
+                if(el.tagName !== 'INPUT' && el.tagName !== 'SELECT' && el.id !== 'closeSettingsBtn') {
+                    el.addEventListener('click', playClickSound);
+                }
+            });
+
+            // Sahte Yükleme Ekranı
             let progress = 0;
+            const messages = ["SYS.BOOT_SEQ.INIT", "LOADING_ASSETS...", "DECRYPTING_DATA...", "ESTABLISHING_CONNECTION...", "READY."];
 
-            // --- 1. SİNEMATİK GİRİŞ AKIŞI ---
             const loadingInterval = setInterval(() => {
-                progress += Math.floor(Math.random() * 6) + 2; 
+                progress += Math.floor(Math.random() * 4) + 1; 
                 if (progress >= 100) {
                     progress = 100;
                     clearInterval(loadingInterval);
-                    onLoadingComplete();
+                    setTimeout(onLoadingComplete, 600);
                 }
                 progressBar.style.width = progress + '%';
-            }, 100);
+                loadingPercent.innerText = progress + '%';
+                
+                if(progress < 25) loadingText.innerText = messages[0];
+                else if(progress < 50) loadingText.innerText = messages[1];
+                else if(progress < 75) loadingText.innerText = messages[2];
+                else if(progress < 99) loadingText.innerText = messages[3];
+                else loadingText.innerText = messages[4];
+
+            }, 70);
 
             function onLoadingComplete() {
-                loadingText.innerText = "Yükleme Tamamlandı";
-                setTimeout(() => {
-                    loaderContainer.classList.add('hide-bar');
-                    loadingText.style.opacity = '0';
-                }, 400);
-
-                setTimeout(() => {
-                    loadingScreen.classList.add('fade-out');
-                    mainMenu.classList.add('show-menu');
-                }, 2200);
+                loadingScreen.classList.add('fade-out');
+                setTimeout(() => { mainMenu.classList.add('show-menu'); }, 1000);
             }
 
-            // --- 2. AYARLAR PANELİ AÇILIŞ/KAPANIŞ KONTROLLERİ ---
+            // Ana Menü Buton Etkileşimleri
             openSettingsBtn.addEventListener('click', () => {
-                mainMenu.classList.add('slide-out'); // Menüyü yana kaydırıp gizle
-                setTimeout(() => {
-                    settingsPanel.classList.add('open'); // Ayarlar panelini ekrana getir
-                }, 300);
+                mainMenu.classList.add('slide-out');
+                setTimeout(() => { settingsPanel.classList.add('open'); }, 400);
             });
 
             closeSettingsBtn.addEventListener('click', () => {
-                settingsPanel.classList.remove('open'); // Ayarlar panelini kapat
+                playTone(400, 'square', 0.1, 0.05); // Kapanış sesi
+                settingsPanel.classList.remove('open');
+                setTimeout(() => { mainMenu.classList.remove('slide-out'); }, 400);
+            });
+
+            startBtn.addEventListener('click', () => {
+                playTone(200, 'sawtooth', 0.8, 0.2); 
+                setTimeout(() => { playTone(800, 'square', 2.0, 0.3); }, 200);
+                flashOverlay.classList.add('active');
                 setTimeout(() => {
-                    mainMenu.classList.remove('slide-out'); // Menüyü eski yerine çağır
-                }, 300);
+                    showModal('success', 'modal_start_title', 'modal_start_desc', 'modal_start_btn');
+                    flashOverlay.classList.remove('active');
+                }, 1000);
+            });
+
+            dailyBtn.addEventListener('click', () => {
+                showModal('reward', 'modal_reward_title', 'modal_reward_desc', 'modal_reward_btn');
+                dailyBtn.style.opacity = '0.5';
+                dailyBtn.style.pointerEvents = 'none';
+            });
+
+            discBtn.addEventListener('click', () => {
+                showModal('danger', 'modal_disc_title', 'modal_disc_desc', 'modal_disc_btn');
+            });
+
+            // Menü Derinliği (Parallax)
+            document.addEventListener('mousemove', (e) => {
+                if(!mainMenu.classList.contains('show-menu') || mainMenu.classList.contains('slide-out')) return;
+                const x = (window.innerWidth / 2 - e.pageX) / 50;
+                const y = (window.innerHeight / 2 - e.pageY) / 50;
+                mainMenu.style.transform = `scale(1) translate(${x}px, ${y}px)`;
             });
         });
 
-        // --- 3. SEKMELER ARASI GEÇİŞ FONKSİYONU ---
+        // --- 5. AYARLAR SEKMESİ VE UI YARDIMCILARI ---
         function switchTab(event, tabId) {
-            // Tüm içerikleri gizle
-            const contents = document.querySelectorAll('.tab-content');
-            contents.forEach(content => content.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
 
-            // Tüm butonların aktiflik durumunu temizle
-            const buttons = document.querySelectorAll('.tab-btn');
-            buttons.forEach(btn => btn.classList.remove('active'));
-
-            // Tıklanan tabı ve butonunu aktifleştir
             document.getElementById(tabId).classList.add('active');
             event.currentTarget.classList.add('active');
+        }
+
+        function updateRangeVal(element) {
+            element.nextElementSibling.innerText = element.value;
+            // Sensör hassasiyeti ondalık gösterimi için
+            if(element.step === "0.1") {
+                element.nextElementSibling.innerText = parseFloat(element.value).toFixed(1);
+            }
         }
     </script>
 </body>
